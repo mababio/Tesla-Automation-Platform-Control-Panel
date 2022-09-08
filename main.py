@@ -169,7 +169,7 @@ def tesla_automation():
             os.environ["IFTTT_TRIGGER_LOCK"] = "False"
     else:
         sms.send_sms(number, 'Automation has been kicked off already. Appears the garage was opened remotely')
-        sms.send_sms(number, str(os.environ.get["IFTTT_TRIGGER_LOCK"]))
+        sms.send_sms(number, str(os.environ["IFTTT_TRIGGER_LOCK"]))
 
 
 if __name__ == "__main__":

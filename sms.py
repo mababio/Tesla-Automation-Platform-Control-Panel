@@ -13,3 +13,6 @@ def send_sms(number, message):
         to=number  # '+19144335805'
     )
     return message.sid
+
+if __name__ == "__main__":
+    send_sms('+19144335805','testing')

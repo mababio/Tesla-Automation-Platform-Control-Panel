@@ -175,18 +175,17 @@ def tesla_automation():
             sms.send_sms(number, 'trigger tesla home automation!')
             tesla.tesla_home_automation_engine()
             sms.send_sms(number, 'automation Done')
-            time.wait(30)
-            tesla.setIFTTT_TRIGGER_LOCK("False")
+            #tesla.setIFTTT_TRIGGER_LOCK("False")
         elif tesla.garage_still_open:
             sms.send_sms(number, ' Garage door has been open for 5 mins. would your like to close, '
                                  'leave open or are you'
                                  ' loading the bikes??')
             sms.send_sms(number, 'automation Done')
-            tesla.setIFTTT_TRIGGER_LOCK("False")
+            #tesla.setIFTTT_TRIGGER_LOCK("False")
         elif tesla.stil_on_home_street:
             sms.send_sms(number, 'limit of 5 mins has been meet or still on Arcui ct')
             sms.send_sms(number, 'automation Done')
-            tesla.setIFTTT_TRIGGER_LOCK("False")
+            #tesla.setIFTTT_TRIGGER_LOCK("False")
     else:
         sms.send_sms(number, 'Automation has been kicked off already. Appears the garage was opened remotely')
 

@@ -20,8 +20,8 @@ class TAP:
         self.url_tesla_prox = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox"
         self.url_tesla_location = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-get_location"
         self.gmaps = googlemaps.Client(key='AIzaSyCpSgkND8wBAdlK8sSaqjgqFMPx7AJmq68')
-        self.garage_open_limit = 30  # 5mins
-        self.confirmation_limit = 30
+        self.garage_open_limit = 100  # 5mins
+        self.confirmation_limit = 100
         client = pymongo.MongoClient("mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
         self.collection = client['tesla']['tesla_trigger']
 
@@ -44,11 +44,11 @@ class TAP:
 
     def confirmation_before_armed(self):
         while self.garage_isopen() and not self.garage_open_limit == 0:
-            sms.send_sms(number,'Checking if still open for 5 mins' + str(self.garage_open_limit))
+            sms.send_sms(number, 'Checking if still open for 5 mins' + str(self.garage_open_limit))
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
-            sms.send_sms(number,'either is still open or checked if open for more then 5 mins OR garage is closed')
+            #sms.send_sms(number,'either is still open or checked if open for more then 5 mins OR garage is closed')
             if not self.garage_isopen() and self.is_tesla_moving() and not self.isOnHomeStreet():
                 sms.send_sms(number,'garage is closed and car is moving and not on home street')
                 return True
@@ -129,8 +129,8 @@ class TAP:
         proximity_value = self.get_proximity()
         while not self.isclose():
             if proximity_value < 1:
-                sms.send_sms(number, "Delay for 2 secs")
-                time.sleep(1)
+                sms.send_sms(number, "Delay for 0 secs")
+                #time.sleep(1)
                 proximity_value = self.get_proximity()
             elif proximity_value < 2:
                 sms.send_sms(number, "Delay for 15 sec")
@@ -172,6 +172,7 @@ def tesla_automation():
             sms.send_sms(number, 'trigger tesla home automation!')
             tesla.tesla_home_automation_engine()
             sms.send_sms(number, 'automation Done')
+            time.wait(3)
             tesla.setIFTTT_TRIGGER_LOCK("False")
         elif tesla.garage_still_open:
             sms.send_sms(number, ' Garage door has been open for 5 mins. would your like to close, '

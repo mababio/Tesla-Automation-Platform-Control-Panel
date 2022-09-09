@@ -1,5 +1,18 @@
-import requests
+import firebase_admin
+from firebase_admin import firestore
+from firebase_admin import credentials
 
-url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
-param = {"state": 'open'}
-requests.post(url_myq_garage, json=param).json()
+cred = credentials.ApplicationDefault()
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()  # this connects to our Firestore database
+collection = db.collection('trigger_lock')  # opens 'places' collection
+doc = collection.document('Mm4BLLgEHxtgeZIhi6iu')  # specifies the 'rome' document
+
+print(doc.get().to_dict()['IFTTT_TRIGGER_LOCK'])
+
+
+
+
+gcloud projects add-iam-policy-binding ensure-dev-zone --member="s535976716507-compute@developer.gserviceaccount.com" --role="roles/datastore.user"
+

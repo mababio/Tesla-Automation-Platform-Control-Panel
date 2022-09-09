@@ -6,6 +6,9 @@ import sms
 import os
 from flask import Flask
 from flask_executor import Executor
+import firebase_admin
+from firebase_admin import firestore
+from firebase_admin import credentials
 
 number = '+19144335805'
 
@@ -20,6 +23,23 @@ class TAP:
         self.gmaps = googlemaps.Client(key='AIzaSyCpSgkND8wBAdlK8sSaqjgqFMPx7AJmq68')
         self.garage_open_limit = 30  # 5mins
         self.confirmation_limit = 30
+        sms.send_sms(number, 'orn!')
+
+        cred = credentials.ApplicationDefault()
+        sms.send_sms(number, 'pom!')
+        firebase_admin.initialize_app(cred)
+        sms.send_sms(number, 'rrr!')
+
+        self.db = firestore.client()  # this connects to our Firestore database
+        sms.send_sms(number, 'fggh!')
+
+    def setIFTTT_TRIGGER_LOCK(self,bolval):
+        self.db.collection('trigger_lock') .set({"setIFTTT_TRIGGER_LOCK": bolval})
+
+    def getIFTTT_TRIGGER_LOCK(self):
+        coll = self.db.collection('trigger_lock')  # opens 'places' collection
+        doc = coll.document('Mm4BLLgEHxtgeZIhi6iu')  # specifies the 'rome' document
+        return doc.get().to_dict()['IFTTT_TRIGGER_LOCK']
 
     def garage_isopen(self):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
@@ -63,6 +83,7 @@ class TAP:
             return False
         else:
             return True
+
     @retry(delay=2, tries=3)
     def isclose(self):
         r_location = requests.post(self.url_tesla_location)
@@ -101,7 +122,7 @@ class TAP:
                 return True
         return False
 
-    def garage(self,state):
+    def garage(self, state):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
         param = {"state": state}
         return requests.post(url_myq_garage, json=param).json()
@@ -109,7 +130,7 @@ class TAP:
     def trigger_tesla_home_automation(self):
         self.garage('open')
         sms.send_sms(number,'Garage door opening!')
-        os.environ["IFTTT_TRIGGER_LOCK"] = "False"
+        self.setIFTTT_TRIGGER_LOCK("False")
 
     def tesla_home_automation_engine(self):
         proximity_value = self.get_proximity()
@@ -144,32 +165,36 @@ executor = Executor(app)
 
 @app.route("/")
 def kickOffJobBG():
+    sms.send_sms(number, 'triggermation!')
     executor.submit(tesla_automation)
     return 'Scheduled a job'
 
 
 def tesla_automation():
-    if os.environ.get("IFTTT_TRIGGER_LOCK") == 'False':
-        os.environ["IFTTT_TRIGGER_LOCK"] = "True"
-        tesla = TAP()
+    sms.send_sms(number, 'triggermation!')
+    tesla = TAP()
+    sms.send_sms(number, 'vuvyv!')
+    IFTTT_TRIGGER_LOCK = tesla.getIFTTT_TRIGGER_LOCK()
+
+    if IFTTT_TRIGGER_LOCK == 'False':
+        tesla.setIFTTT_TRIGGER_LOCK("True")
         if tesla.confirmation_before_armed():
             sms.send_sms(number, 'trigger tesla home automation!')
             tesla.tesla_home_automation_engine()
             sms.send_sms(number, 'automation Done')
-            os.environ["IFTTT_TRIGGER_LOCK"] = "False"
+            tesla.setIFTTT_TRIGGER_LOCK("False")
         elif tesla.garage_still_open:
             sms.send_sms(number, ' Garage door has been open for 5 mins. would your like to close, '
                                  'leave open or are you'
                                  ' loading the bikes??')
             sms.send_sms(number, 'automation Done')
-            os.environ["IFTTT_TRIGGER_LOCK"] = "False"
+            tesla.setIFTTT_TRIGGER_LOCK("False")
         elif tesla.stil_on_home_street:
             sms.send_sms(number, 'limit of 5 mins has been meet or still on Arcui ct')
             sms.send_sms(number, 'automation Done')
-            os.environ["IFTTT_TRIGGER_LOCK"] = "False"
+            tesla.setIFTTT_TRIGGER_LOCK("False")
     else:
         sms.send_sms(number, 'Automation has been kicked off already. Appears the garage was opened remotely')
-        sms.send_sms(number, str(os.environ["IFTTT_TRIGGER_LOCK"]))
 
 
 if __name__ == "__main__":

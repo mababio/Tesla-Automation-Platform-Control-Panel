@@ -6,9 +6,8 @@ import sms
 import os
 from flask import Flask
 from flask_executor import Executor
-import firebase_admin
-from firebase_admin import firestore
-from firebase_admin import credentials
+import pymongo
+from pymongo.server_api import ServerApi
 
 REMOVED
 
@@ -23,23 +22,17 @@ class TAP:
 REMOVED
         self.garage_open_limit = 30  # 5mins
         self.confirmation_limit = 30
-        sms.send_sms(number, 'orn!')
-
-        cred = credentials.ApplicationDefault()
-        sms.send_sms(number, 'pom!')
-        firebase_admin.initialize_app(cred)
-        sms.send_sms(number, 'rrr!')
-
-        self.db = firestore.client()  # this connects to our Firestore database
-        sms.send_sms(number, 'fggh!')
+REMOVED
+        self.collection = client['tesla']['tesla_trigger']
 
     def setIFTTT_TRIGGER_LOCK(self,bolval):
-        self.db.collection('trigger_lock') .set({"setIFTTT_TRIGGER_LOCK": bolval})
+        myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
+        newvalues = {"$set": {"lock": bolval}}
+        self.collection.update_one(myquery, newvalues)
 
     def getIFTTT_TRIGGER_LOCK(self):
-        coll = self.db.collection('trigger_lock')  # opens 'places' collection
-        doc = coll.document('Mm4BLLgEHxtgeZIhi6iu')  # specifies the 'rome' document
-        return doc.get().to_dict()['IFTTT_TRIGGER_LOCK']
+        return self.collection.find_one()['lock']
+
 
     def garage_isopen(self):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
@@ -60,7 +53,7 @@ REMOVED
                 sms.send_sms(number,'garage is closed and car is moving and not on home street')
                 return True
             elif self.garage_isopen() and self.garage_open_limit == 0:
-                sms.send_sms(number,'garage has been open for more than 5 mins and we are terminating confirmation function')
+                sms.send_sms(number, 'garage has been open for more than 5 mins and we are terminating confirmation function')
                 self.garage_still_open = True
                 return False
             else:
@@ -129,14 +122,14 @@ REMOVED
 
     def trigger_tesla_home_automation(self):
         self.garage('open')
-        sms.send_sms(number,'Garage door opening!')
+        sms.send_sms(number, 'Garage door opening!')
         self.setIFTTT_TRIGGER_LOCK("False")
 
     def tesla_home_automation_engine(self):
         proximity_value = self.get_proximity()
         while not self.isclose():
             if proximity_value < 1:
-                sms.send_sms(number,"Delay for 2 secs")
+                sms.send_sms(number, "Delay for 2 secs")
                 time.sleep(2)
                 proximity_value = self.get_proximity()
             elif proximity_value < 2:
@@ -165,15 +158,12 @@ executor = Executor(app)
 
 @app.route("/")
 def kickOffJobBG():
-    sms.send_sms(number, 'triggermation!')
     executor.submit(tesla_automation)
     return 'Scheduled a job'
 
 
 def tesla_automation():
-    sms.send_sms(number, 'triggermation!')
     tesla = TAP()
-    sms.send_sms(number, 'vuvyv!')
     IFTTT_TRIGGER_LOCK = tesla.getIFTTT_TRIGGER_LOCK()
 
     if IFTTT_TRIGGER_LOCK == 'False':

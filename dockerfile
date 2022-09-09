@@ -6,6 +6,7 @@ COPY main.py ./
 COPY requirement.txt ./
 COPY sms.py ./
 RUN pip install --no-cache-dir -r  requirement.txt
+RUN pip install 'pymongo[srv]'
 ENV PORT 8080
 ENV IFTTT_TRIGGER_LOCK False
 # Timeout is set to 0 to disable the timeouts of the workers to allow Cloud Run to handle instance scaling.

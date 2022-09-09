@@ -121,9 +121,12 @@ class TAP:
         return requests.post(url_myq_garage, json=param).json()
 
     def trigger_tesla_home_automation(self):
-        self.garage('open')
-        sms.send_sms(number, 'Garage door opening!')
-        self.setIFTTT_TRIGGER_LOCK("False")
+        if self.isOnHomeStreet():
+            self.garage('open')
+            sms.send_sms(number, 'Garage door opening!')
+            self.setIFTTT_TRIGGER_LOCK("False")
+        else:
+            sms.send_sms(number,'is close, but not on home street')
 
     def tesla_home_automation_engine(self):
         proximity_value = self.get_proximity()

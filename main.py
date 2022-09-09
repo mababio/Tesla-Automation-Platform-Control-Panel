@@ -130,7 +130,7 @@ REMOVED
         while not self.isclose():
             if proximity_value < 1:
                 sms.send_sms(number, "Delay for 2 secs")
-                time.sleep(2)
+                time.sleep(1)
                 proximity_value = self.get_proximity()
             elif proximity_value < 2:
                 sms.send_sms(number, "Delay for 15 sec")

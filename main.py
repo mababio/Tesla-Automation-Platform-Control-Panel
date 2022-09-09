@@ -129,7 +129,7 @@ REMOVED
         proximity_value = self.get_proximity()
         while not self.isclose():
             if proximity_value < 1:
-                sms.send_sms(number, "Delay for 0 secs")
+                #sms.send_sms(number, "Delay for 0 secs")
                 #time.sleep(1)
                 proximity_value = self.get_proximity()
             elif proximity_value < 2:
@@ -172,7 +172,7 @@ def tesla_automation():
             sms.send_sms(number, 'trigger tesla home automation!')
             tesla.tesla_home_automation_engine()
             sms.send_sms(number, 'automation Done')
-            time.wait(3)
+            time.wait(30)
             tesla.setIFTTT_TRIGGER_LOCK("False")
         elif tesla.garage_still_open:
             sms.send_sms(number, ' Garage door has been open for 5 mins. would your like to close, '

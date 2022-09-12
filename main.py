@@ -181,7 +181,7 @@ def garage_door_closed():
     myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
     newvalues = {"$set": {"lock": "False"}}
     g.db.update_one(myquery, newvalues)
-    if g.db.find_one()['lock'] == "False"
+    if g.db.find_one()['lock'] == "False":
         return "ready to run again!"
     else:
         return "Not ready to run again"

@@ -1,18 +1,29 @@
-import asyncio
-from aiohttp import ClientSession
-import pymyq
-import time
+# import asyncio
+# from aiohttp import ClientSession
+# import pymyq
+# import time
+import pymongo
+from pymongo.server_api import ServerApi
 
 
-latlon = self.getlocation()
-lat = latlon['lat']
-lon = latlon['lon']
-reverse_geocode_result = self.gmaps.reverse_geocode((lat, lon))
-for i in reverse_geocode_result:
-    if 'Arcuri Court' in i['address_components'][0]['long_name']:
-        return True
-return False
+client = pymongo.MongoClient("mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
+db = client['tesla']
 
+myquery = {"_id": "garage"}
+newvalues = {"$set": {"closed_reason": 'foo'}}
+db['garage'].update_one(myquery, newvalues)
+
+
+
+# latlon = self.getlocation()
+# lat = latlon['lat']
+# lon = latlon['lon']
+# reverse_geocode_result = self.gmaps.reverse_geocode((lat, lon))
+# for i in reverse_geocode_result:
+#     if 'Arcuri Court' in i['address_components'][0]['long_name']:
+#         return True
+# return False
+# 
 
 #import pymongo
 #from pymongo.server_api import ServerApi

@@ -23,7 +23,7 @@ def get_door_close_status():
 def set_door_close_status(reason):
     myquery = {"_id": "garage"}
     newvalues = {"$set": {"closed_reason": reason}}
-    g.db['tesla_trigger'].update_one(myquery, newvalues)
+    g.db['garage'].update_one(myquery, newvalues)
 
 
 
@@ -188,8 +188,11 @@ def kick_off_job_iftt_open_BG():
 def kick_off_job_iftt_close_BG():
     if get_door_close_status() == 'came_home':
         executor.submit(garage_door_closed)
+        sms.send_sms('Car has arrive and door was closed')
         return 'Car has arrive and door was closed'
-    return 'Door was not closed b/c car came home'
+    else:
+        sms.send_sms('Door was not closed b/c car came home')
+        return 'Door was not closed b/c car came home'
 
 
 def garage_door_closed():
@@ -197,7 +200,7 @@ def garage_door_closed():
     ct = {"$set": {"lock": "False"}}
     myquery_garage_closed_reason = {"_id": "garage"}
     newvalues_ifttt_trigger_lock = {"$set": {"locked_reason": " "}}
-    
+
     g.db['tesla_trigger'].update_one(myquery_ifttt_trigger_lock, ct)
     g.db['garage'].update_one(myquery_garage_closed_reason, newvalues_ifttt_trigger_lock)
 
@@ -207,7 +210,7 @@ def tesla_automation():
     if tesla.confirmation_before_armed():
         sms.send_sms('trigger tesla home automation!')
         tesla.tesla_home_automation_engine()
-        sms.send_sms('automation Done')    
+        sms.send_sms('automation Done')
     elif tesla.garage_still_open:
         sms.send_sms(' Garage door has been open for 5 mins. would your like to close, '
                              'leave open or are you'

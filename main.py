@@ -161,7 +161,7 @@ def before_request():
 
 
 @app.route("/open")
-def kickOffJobBG():
+def kick_off_job_iftt_open_BG():
     if g.db.find_one()['lock'] == 'False':
         executor.submit(tesla_automation)
         return 'Scheduled a job'
@@ -171,7 +171,7 @@ def kickOffJobBG():
 
 
 @app.route("/close")
-def kickOffJobBG():
+def kick_off_job_iftt_close_BG():
     executor.submit(garage_door_closed)
     return 'Scheduled a job'
 

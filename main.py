@@ -5,11 +5,13 @@ import time
 import sms
 import os
 from flask import Flask
+from flask import g
 from flask_executor import Executor
 import pymongo
 from pymongo.server_api import ServerApi
 
 #number = '+19144335805'
+bolval = None
 
 
 class TAP:
@@ -151,18 +153,37 @@ class TAP:
 app = Flask(__name__)
 executor = Executor(app)
 
+@app.before_request
+def before_request():
+    sms.send_sms("init function")
+    client = pymongo.MongoClient("mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
+    g.db =  client['tesla']['tesla_trigger']
+
 
 @app.route("/open")
 def kickOffJobBG():
-    executor.submit(tesla_automation)
+    if g.db.find_one()['lock'] == 'False':
+        executor.submit(tesla_automation)
+        return 'Scheduled a job'
+    else:
+        sms.send_sms("Process is already running")
+        return 'Process is already running'
+
+
+@app.route("/close")
+def kickOffJobBG():
+    executor.submit(garage_door_closed)
     return 'Scheduled a job'
 
-# @app.route("/close")
-# def kickOffJobBG():
-#     executor.submit(tesla_automation)
-#     return 'Scheduled a job'
 
 def garage_door_closed():
+    myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
+    newvalues = {"$set": {"lock": "False"}}
+    g.db.update_one(myquery, newvalues)
+    if g.db.find_one()['lock'] == "False"
+        return "ready to run again!"
+    else:
+        return "Not ready to run again"
 
 
 def tesla_automation():

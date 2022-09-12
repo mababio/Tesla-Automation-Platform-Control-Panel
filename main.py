@@ -162,7 +162,7 @@ def kickOffJobBG():
 #     executor.submit(tesla_automation)
 #     return 'Scheduled a job'
 
-def garage_door_closed():
+#def garage_door_closed():
 
 
 def tesla_automation():

@@ -198,7 +198,7 @@ if __name__ == "__main__":
     start = time.time()
     print(tap.isclose())
     #print(tap.get_proximity())
-    print(tap.garage('close'))
+    #print(tap.garage('close'))
     end = time.time()
     print(end - start)
    # app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

@@ -45,25 +45,25 @@ REMOVED
 
     def confirmation_before_armed(self):
         while self.garage_isopen() and not self.garage_open_limit == 0:
-            sms.send_sms(number, 'Checking if still open for 5 mins' + str(self.garage_open_limit))
+            sms.send_sms( 'Checking if still open for 5 mins' + str(self.garage_open_limit))
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
             if not self.garage_isopen() and self.is_tesla_moving() and not self.isOnHomeStreet():
-                sms.send_sms(number,'garage is closed and car is moving and not on home street')
+                sms.send_sms('garage is closed and car is moving and not on home street')
                 return True
             elif self.garage_isopen() and self.garage_open_limit == 0:
-                sms.send_sms(number, 'garage has been open for more than 5 mins and we are terminating confirmation function')
+                sms.send_sms( 'garage has been open for more than 5 mins and we are terminating confirmation function')
                 self.garage_still_open = True
                 return False
             else:
                 while self.isOnHomeStreet() and not self.confirmation_limit == 0:
-                    sms.send_sms(number, 'car is parked on street with garage closed')
+                    sms.send_sms( 'car is parked on street with garage closed')
                     time.sleep(5)
                     self.confirmation_limit -= 5
                 else:
                     if not self.isOnHomeStreet(): # not on home street
-                        sms.send_sms(number, 'Not sure about this case, but returning true')
+                        sms.send_sms( 'Not sure about this case, but returning true')
                         return True
                     else:
                         self.stil_on_home_street = True
@@ -117,29 +117,32 @@ REMOVED
 
     def trigger_tesla_home_automation(self):
         self.garage('open')
-        sms.send_sms(number, 'Garage door opening!')
+        sms.send_sms( 'Garage door opening!')
+        
+    def cleanup(self):
+        sms.send_sms( 'cleaning up')
+        time.sleep(5)
         self.setIFTTT_TRIGGER_LOCK("False")
-
-
+        
     def tesla_home_automation_engine(self):
 
         while not self.isclose():
             if self.proximity_value < .07:
                 continue
             elif self.proximity_value < 1:
-                sms.send_sms(number, "Delay for 1 secs")
+                sms.send_sms("Delay for 1 secs")
                 time.sleep(1)
             elif self.proximity_value < 2:
-                sms.send_sms(number, "Delay for 15 sec")
+                sms.send_sms("Delay for 15 sec")
                 time.sleep(15)
             elif self.proximity_value < 3:
-                sms.send_sms(number,"Delay for 2 mins")
+                sms.send_sms("Delay for 2 mins")
                 time.sleep(120)
             elif self.proximity_value < 7:
-                sms.send_sms(number, "Delay for 5 mins")
+                sms.send_sms("Delay for 5 mins")
                 time.sleep(300)
             else:
-                sms.send_sms(number, "Delay for 15 mins")
+                sms.send_sms("Delay for 15 mins")
                 time.sleep(900)
         else:
             self.trigger_tesla_home_automation()
@@ -162,22 +165,22 @@ def tesla_automation():
     if IFTTT_TRIGGER_LOCK == 'False':
         tesla.setIFTTT_TRIGGER_LOCK("True")
         if tesla.confirmation_before_armed():
-            sms.send_sms(number, 'trigger tesla home automation!')
+            sms.send_sms('trigger tesla home automation!')
             tesla.tesla_home_automation_engine()
-            sms.send_sms(number, 'automation Done')
-            #tesla.setIFTTT_TRIGGER_LOCK("False")
+            sms.send_sms('automation Done')
+            tesla.cleanup()
         elif tesla.garage_still_open:
-            sms.send_sms(number, ' Garage door has been open for 5 mins. would your like to close, '
+            sms.send_sms(' Garage door has been open for 5 mins. would your like to close, '
                                  'leave open or are you'
                                  ' loading the bikes??')
-            sms.send_sms(number, 'automation Done')
-            #tesla.setIFTTT_TRIGGER_LOCK("False")
+            sms.send_sms( 'automation Done')
+            tesla.cleanup()
         elif tesla.stil_on_home_street:
-            sms.send_sms(number, 'limit of 5 mins has been meet or still on Arcui ct')
-            sms.send_sms(number, 'automation Done')
-            #tesla.setIFTTT_TRIGGER_LOCK("False")
+            sms.send_sms('limit of 5 mins has been meet or still on Arcui ct')
+            sms.send_sms('automation Done')
+            tesla.cleanup()
     else:
-        sms.send_sms(number, 'Automation has been kicked off already. Appears the garage was opened remotely')
+        sms.send_sms('Automation has been kicked off already. Appears the garage was opened remotely')
 
 
 if __name__ == "__main__":

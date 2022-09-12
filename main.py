@@ -14,6 +14,19 @@ from pymongo.server_api import ServerApi
 bolval = None
 
 
+
+def get_door_close_status():
+    return g.db['garage'].find_one()['closed_reason']
+
+
+
+def set_door_close_status(reason):
+    myquery = {"_id": "garage"}
+    newvalues = {"$set": {"closed_reason": reason}}
+    g.db['tesla_trigger'].update_one(myquery, newvalues)
+
+
+
 class TAP:
 
     def __init__(self):
@@ -35,7 +48,6 @@ class TAP:
 
     def getIFTTT_TRIGGER_LOCK(self):
         return self.collection.find_one()['lock']
-
 
     def garage_isopen(self):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
@@ -119,12 +131,11 @@ class TAP:
 
     def trigger_tesla_home_automation(self):
         self.garage('open')
-        sms.send_sms( 'Garage door opening!')
+        sms.send_sms('Garage door opening!')
 
     def cleanup(self):
-        sms.send_sms( 'cleaning up')
-        time.sleep(5)
-        self.setIFTTT_TRIGGER_LOCK("False")
+        sms.send_sms( 'Setinng job done')
+        set_door_close_status("came_home")
 
     def tesla_home_automation_engine(self):
 
@@ -157,12 +168,15 @@ executor = Executor(app)
 def before_request():
     sms.send_sms("init function")
     client = pymongo.MongoClient("mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
-    g.db =  client['tesla']['tesla_trigger']
+    g.db = client['tesla']
 
 
 @app.route("/open")
 def kick_off_job_iftt_open_BG():
-    if g.db.find_one()['lock'] == 'False':
+    if g.db['tesla_trigger'].find_one()['lock'] == 'False':
+        myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
+        newvalues = {"$set": {"lock": "True"}}
+        g.db['tesla_trigger'].update_one(myquery, newvalues)
         executor.submit(tesla_automation)
         return 'Scheduled a job'
     else:
@@ -172,44 +186,38 @@ def kick_off_job_iftt_open_BG():
 
 @app.route("/close")
 def kick_off_job_iftt_close_BG():
-    executor.submit(garage_door_closed)
-    return 'Scheduled a job'
+    if get_door_close_status() == 'came_home':
+        executor.submit(garage_door_closed)
+        return 'Car has arrive and door was closed'
+    return 'Door was not closed b/c car came home'
 
 
 def garage_door_closed():
-    myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
-    newvalues = {"$set": {"lock": "False"}}
-    g.db.update_one(myquery, newvalues)
-    if g.db.find_one()['lock'] == "False":
-        return "ready to run again!"
-    else:
-        return "Not ready to run again"
-
+    myquery_ifttt_trigger_lock = {"_id": "IFTTT_TRIGGER_LOCK"}
+    ct = {"$set": {"lock": "False"}}
+    myquery_garage_closed_reason = {"_id": "garage"}
+    newvalues_ifttt_trigger_lock = {"$set": {"locked_reason": " "}}
+    
+    g.db['tesla_trigger'].update_one(myquery_ifttt_trigger_lock, ct)
+    g.db['garage'].update_one(myquery_garage_closed_reason, newvalues_ifttt_trigger_lock)
 
 
 def tesla_automation():
     tesla = TAP()
-    IFTTT_TRIGGER_LOCK = tesla.getIFTTT_TRIGGER_LOCK()
+    if tesla.confirmation_before_armed():
+        sms.send_sms('trigger tesla home automation!')
+        tesla.tesla_home_automation_engine()
+        sms.send_sms('automation Done')    
+    elif tesla.garage_still_open:
+        sms.send_sms(' Garage door has been open for 5 mins. would your like to close, '
+                             'leave open or are you'
+                             ' loading the bikes??')
+        sms.send_sms( 'automation Done')
+    elif tesla.stil_on_home_street:
+        sms.send_sms('limit of 5 mins has been meet or still on Arcui ct')
+        sms.send_sms('automation Done')
+    tesla.cleanup()
 
-    if IFTTT_TRIGGER_LOCK == 'False':
-        tesla.setIFTTT_TRIGGER_LOCK("True")
-        if tesla.confirmation_before_armed():
-            sms.send_sms('trigger tesla home automation!')
-            tesla.tesla_home_automation_engine()
-            sms.send_sms('automation Done')
-            tesla.cleanup()
-        elif tesla.garage_still_open:
-            sms.send_sms(' Garage door has been open for 5 mins. would your like to close, '
-                                 'leave open or are you'
-                                 ' loading the bikes??')
-            sms.send_sms( 'automation Done')
-            tesla.cleanup()
-        elif tesla.stil_on_home_street:
-            sms.send_sms('limit of 5 mins has been meet or still on Arcui ct')
-            sms.send_sms('automation Done')
-            tesla.cleanup()
-    else:
-        sms.send_sms('Automation has been kicked off already. Appears the garage was opened remotely')
 
 
 if __name__ == "__main__":

@@ -176,7 +176,6 @@ def kickOffJobBG():
     return 'Scheduled a job'
 
 
-
 def garage_door_closed():
     myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
     newvalues = {"$set": {"lock": "False"}}

@@ -21,8 +21,8 @@ class TAP:
         self.url_tesla_prox = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox"
         self.url_tesla_location = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-get_location"
         self.gmaps = googlemaps.Client(key='AIzaSyCpSgkND8wBAdlK8sSaqjgqFMPx7AJmq68')
-        self.garage_open_limit = 100  # 5mins
-        self.confirmation_limit = 100
+        self.garage_open_limit = 20  # 5mins
+        self.confirmation_limit = 20
         client = pymongo.MongoClient("mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
         self.collection = client['tesla']['tesla_trigger']
 
@@ -118,12 +118,12 @@ class TAP:
     def trigger_tesla_home_automation(self):
         self.garage('open')
         sms.send_sms( 'Garage door opening!')
-        
+
     def cleanup(self):
         sms.send_sms( 'cleaning up')
         time.sleep(5)
         self.setIFTTT_TRIGGER_LOCK("False")
-        
+
     def tesla_home_automation_engine(self):
 
         while not self.isclose():
@@ -152,10 +152,17 @@ app = Flask(__name__)
 executor = Executor(app)
 
 
-@app.route("/")
+@app.route("/open")
 def kickOffJobBG():
     executor.submit(tesla_automation)
     return 'Scheduled a job'
+
+# @app.route("/close")
+# def kickOffJobBG():
+#     executor.submit(tesla_automation)
+#     return 'Scheduled a job'
+
+def garage_door_closed():
 
 
 def tesla_automation():

@@ -15,7 +15,6 @@ number = '+19144335805'
 class TAP:
 
     def __init__(self):
-        self.proximity_value = None
         self.garage_still_open = None
         self.stil_on_home_street = None
         self.url_tesla_prox = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox"
@@ -49,6 +48,7 @@ class TAP:
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
+            #sms.send_sms(number,'either is still open or checked if open for more then 5 mins OR garage is closed')
             if not self.garage_isopen() and self.is_tesla_moving() and not self.isOnHomeStreet():
                 sms.send_sms(number,'garage is closed and car is moving and not on home street')
                 return True
@@ -58,12 +58,12 @@ class TAP:
                 return False
             else:
                 while self.isOnHomeStreet() and not self.confirmation_limit == 0:
-                    sms.send_sms(number, 'car is parked on street with garage closed')
+                    sms.send_sms(number,'car is parked on street with garage closed')
                     time.sleep(5)
                     self.confirmation_limit -= 5
                 else:
                     if not self.isOnHomeStreet(): # not on home street
-                        sms.send_sms(number, 'Not sure about this case, but returning true')
+                        sms.send_sms(number,'Not sure about this case, but returning true')
                         return True
                     else:
                         self.stil_on_home_street = True
@@ -79,20 +79,23 @@ class TAP:
 
     @retry(delay=2, tries=3)
     def isclose(self):
-        return_value = self.get_full_proximity()
-        self.proximity_value = return_value['difference']
+        r_location = requests.post(self.url_tesla_location)
+        lat = float(r_location.json()['lat'])
+        lon = float(r_location.json()['lon'])
+        param_prox = {"lat": lat, "lon": lon}
+        return_value = requests.post(self.url_tesla_prox, json=param_prox).json()
         if return_value['is_on_arcuri'] and return_value['is_close']:
             return True
         else:
             return False
 
     @retry(delay=2, tries=3)
-    def get_full_proximity(self):
-        r_location = requests.post(self.url_tesla_location)
+    def get_proximity(self):
+        r_location = requests.get(self.url_tesla_location)
         lat = float(r_location.json()['lat'])
         lon = float(r_location.json()['lon'])
         param_prox = {"lat": lat, "lon": lon}
-        return requests.post(self.url_tesla_prox, json=param_prox).json()
+        return requests.post(self.url_tesla_prox, json=param_prox).json()['difference']
 
     @retry(delay=2, tries=3)
     def getlocation(self):
@@ -104,7 +107,9 @@ class TAP:
 
     def isOnHomeStreet(self):
         latlon = self.getlocation()
-        reverse_geocode_result = self.gmaps.reverse_geocode((latlon['lat'], latlon['lon']))
+        lat = latlon['lat']
+        lon = latlon['lon']
+        reverse_geocode_result = self.gmaps.reverse_geocode((lat, lon))
         for i in reverse_geocode_result:
             if 'Arcuri Court' in i['address_components'][0]['long_name']:
                 return True
@@ -116,31 +121,36 @@ class TAP:
         return requests.post(url_myq_garage, json=param).json()
 
     def trigger_tesla_home_automation(self):
-        self.garage('open')
-        sms.send_sms(number, 'Garage door opening!')
-        self.setIFTTT_TRIGGER_LOCK("False")
-
+        if self.isOnHomeStreet():
+            self.garage('open')
+            sms.send_sms(number, 'Garage door opening!')
+            self.setIFTTT_TRIGGER_LOCK("False")
+        else:
+            sms.send_sms(number,'is close, but not on home street')
 
     def tesla_home_automation_engine(self):
-
+        proximity_value = self.get_proximity()
         while not self.isclose():
-            if self.proximity_value < .07:
-                continue
-            elif self.proximity_value < 1:
-                sms.send_sms(number, "Delay for 1 secs")
-                time.sleep(1)
-            elif self.proximity_value < 2:
+            if proximity_value < 1:
+                #sms.send_sms(number, "Delay for 0 secs")
+                #time.sleep(1)
+                proximity_value = self.get_proximity()
+            elif proximity_value < 2:
                 sms.send_sms(number, "Delay for 15 sec")
                 time.sleep(15)
-            elif self.proximity_value < 3:
+                proximity_value = self.get_proximity()
+            elif proximity_value < 3:
                 sms.send_sms(number,"Delay for 2 mins")
                 time.sleep(120)
-            elif self.proximity_value < 7:
+                proximity_value = self.get_proximity()
+            elif proximity_value < 7:
                 sms.send_sms(number, "Delay for 5 mins")
                 time.sleep(300)
+                proximity_value = self.get_proximity()
             else:
                 sms.send_sms(number, "Delay for 15 mins")
                 time.sleep(900)
+                proximity_value = self.get_proximity()
         else:
             self.trigger_tesla_home_automation()
 
@@ -181,4 +191,14 @@ def tesla_automation():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    tap = TAP()
+    # param_prox = {"lat": 40.669498, "lon": -74.096909}
+    # val = requests.post(tap.url_tesla_prox, json=param_prox).json()['difference']
+    # print(val)
+    start = time.time()
+    print(tap.isclose())
+    #print(tap.get_proximity())
+    print(tap.garage('close'))
+    end = time.time()
+    print(end - start)
+   # app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

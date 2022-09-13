@@ -1,5 +1,5 @@
 import requests
-from retry import retry
+
 import googlemaps
 import time
 import sms
@@ -141,20 +141,20 @@ def garage_door_closed():
 
 
 def tesla_automation():
-    tesla = TAP()
-    if tesla.confirmation_before_armed():
+    tesla_tap = TAP()
+    if tesla_tap.confirmation_before_armed():
         sms.send_sms('trigger tesla home automation!')
-        tesla.tesla_home_automation_engine()
+        tesla_tap.tesla_home_automation_engine()
         sms.send_sms('automation Done')
-    elif tesla.garage_still_open:
+    elif tesla_tap.garage_still_open:
         sms.send_sms(' Garage door has been open for 5 mins. would your like to close, '
                      'leave open or are you'
                      ' loading the bikes??')
         sms.send_sms('automation Done')
-    elif tesla.stil_on_home_street:
+    elif tesla_tap.stil_on_home_street:
         sms.send_sms('limit of 5 mins has been meet or still on Arcui ct')
         sms.send_sms('automation Done')
-    tesla.cleanup()
+    tesla_tap.cleanup()
 
 
 if __name__ == "__main__":

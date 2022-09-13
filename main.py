@@ -10,9 +10,6 @@ from flask_executor import Executor
 import pymongo
 from pymongo.server_api import ServerApi
 
-#number = '+19144335805'
-bolval = None
-
 
 
 def get_door_close_status():
@@ -166,7 +163,6 @@ executor = Executor(app)
 
 @app.before_request
 def before_request():
-    sms.send_sms("init function")
     client = pymongo.MongoClient("mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
     g.db = client['tesla']
 

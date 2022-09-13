@@ -3,6 +3,7 @@ FROM python:3.10-slim
 ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY main.py ./
+COPY db_mongo.py ./
 COPY requirement.txt ./
 COPY sms.py ./
 RUN pip install --no-cache-dir -r  requirement.txt

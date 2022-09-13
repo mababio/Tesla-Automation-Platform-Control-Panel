@@ -10,9 +10,6 @@ from flask_executor import Executor
 import pymongo
 from pymongo.server_api import ServerApi
 
-REMOVED
-bolval = None
-
 
 
 def get_door_close_status():
@@ -166,7 +163,6 @@ executor = Executor(app)
 
 @app.before_request
 def before_request():
-    sms.send_sms("init function")
 REMOVED
     g.db = client['tesla']
 

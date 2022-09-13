@@ -2,19 +2,23 @@
 # from aiohttp import ClientSession
 # import pymyq
 # import time
-import pymongo
-from pymongo.server_api import ServerApi
+import teslapy
+import json
 
+def tesla_get_location():
+    with teslapy.Tesla('michaelkwasi@gmail.com') as tesla:
+        vehicles = tesla.vehicle_list()
+        vehicles[0].sync_wake_up()
+        professor = vehicles[0]
+        tesla_data_climate = professor.api('VEHICLE_DATA')['response']['climate_state']
+        if not tesla_data_climate['is_climate_on']:
+            professor.command('CLIMATE_ON')
+        professor.command('CHANGE_CLIMATE_TEMPERATURE_SETTING', driver_temp='22.7778', passenger_temp='22.7778')
 
-client = pymongo.MongoClient("mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
-db = client['tesla']
+        return  tesla_data_climate
+    #return str(tuple_latlon)
 
-myquery = {"_id": "garage"}
-newvalues = {"$set": {"closed_reason": 'foo'}}
-db['garage'].update_one(myquery, newvalues)
-
-
-
+print(tesla_get_location())
 # latlon = self.getlocation()
 # lat = latlon['lat']
 # lon = latlon['lon']
@@ -23,7 +27,7 @@ db['garage'].update_one(myquery, newvalues)
 #     if 'Arcuri Court' in i['address_components'][0]['long_name']:
 #         return True
 # return False
-# 
+#
 
 #import pymongo
 #from pymongo.server_api import ServerApi

@@ -8,6 +8,7 @@ from flask import Flask
 from flask import g
 from flask_executor import Executor
 from db_mongo import db_client
+from tesla import Tesla
 
 
 class TAP:
@@ -22,6 +23,7 @@ REMOVED
         self.garage_open_limit = 20  # 5mins
         self.confirmation_limit = 20
         self.db = db_client()
+        self.tesla = Tesla()
 
     def garage_isopen(self):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
@@ -37,7 +39,7 @@ REMOVED
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
-            if not self.garage_isopen() and self.is_tesla_moving() and not self.is_on_home_street():
+            if not self.garage_isopen() and self.tesla.is_tesla_moving() and not self.tesla.is_on_home_street():
                 sms.send_sms('garage is closed and car is moving and not on home street')
                 return True
             elif self.garage_isopen() and self.garage_open_limit == 0:
@@ -45,57 +47,19 @@ REMOVED
                 self.garage_still_open = True
                 return False
             else:
-                while self.is_on_home_street() and not self.confirmation_limit == 0:
+                while self.tesla.is_on_home_street() and not self.confirmation_limit == 0:
                     sms.send_sms('car is parked on street with garage closed')
                     time.sleep(5)
                     self.confirmation_limit -= 5
                 else:
-                    if not self.is_on_home_street():  # not on home street
+                    if not self.tesla.is_on_home_street():  # not on home street
                         sms.send_sms('Not sure about this case, but returning true')
                         return True
                     else:
                         self.stil_on_home_street = True
                         return False
 
-    def is_tesla_moving(self):
-        speed = requests.post(self.url_tesla_location).json()['speed']
-        if speed == 'None':
-            return False
-        else:
-            return True
 
-    @retry(delay=2, tries=3)
-    def is_close(self):
-        return_value = self.get_full_proximity()
-        self.proximity_value = return_value['difference']
-        if return_value['is_on_arcuri'] and return_value['is_close']:
-            return True
-        else:
-            return False
-
-    @retry(delay=2, tries=3)
-    def get_full_proximity(self):
-        r_location = requests.post(self.url_tesla_location)
-        lat = float(r_location.json()['lat'])
-        lon = float(r_location.json()['lon'])
-        param_prox = {"lat": lat, "lon": lon}
-        return requests.post(self.url_tesla_prox, json=param_prox).json()
-
-    @retry(delay=2, tries=3)
-    def get_location(self):
-        r_location = requests.post(self.url_tesla_location)
-        lat = float(r_location.json()['lat'])
-        lon = float(r_location.json()['lon'])
-        param_prox = {"lat": lat, "lon": lon}
-        return param_prox
-
-    def is_on_home_street(self):
-        latlon = self.get_location()
-        reverse_geocode_result = self.gmaps.reverse_geocode((latlon['lat'], latlon['lon']))
-        for i in reverse_geocode_result:
-            if 'Arcuri Court' in i['address_components'][0]['long_name']:
-                return True
-        return False
 
     def garage(self, state):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
@@ -111,7 +75,7 @@ REMOVED
         self.db.set_door_close_status("came_home")
 
     def tesla_home_automation_engine(self):
-        while not self.is_close():
+        while not self.telsa.is_close():
             if self.proximity_value < .07:
                 continue
             elif self.proximity_value < 1:

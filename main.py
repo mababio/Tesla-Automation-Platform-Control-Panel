@@ -8,7 +8,7 @@ from flask import Flask
 from flask import g
 from flask_executor import Executor
 from db_mongo import db_client
-import tesla
+from tesla import Tesla
 
 class TAP:
 

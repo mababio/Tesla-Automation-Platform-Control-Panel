@@ -11,12 +11,20 @@ REMOVED
         self.url_tesla_prox = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox"
         self.url_tesla_location = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-get_location"
         self.proximity_value = None
+        self.url_tesla_set_temp = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-set-temp"
 
-    # def set_temp(self,temp):
-    #     return True
-    #
-    #
+    def set_temp(self, temp='22.7778'):
+        param = {"temp": temp}
+        return requests.post(self.url_tesla_set_temp, json=param)
+
+
     # def is_tesla_ready_for_climate_on(self):
+    # 1. car is not moving, and parked for a while
+ #       - store gps location and add time_share timestamp if hasn't chnage then
+    # 2. car is not home
+    # 3. battery is good enough
+    # 4. not in vacation mode - save to mongo
+    # 5.  not in_service
     #     return True
     #
     #

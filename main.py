@@ -1,10 +1,11 @@
-from app import sms
 import os
 from flask import Flask
 from flask import g
 from flask_executor import Executor
-from app.db_mongo import db_client
-import app.tap as tap
+#from app.db_mongo import db_client
+from util.db_mongo import db_client
+from util import tap
+from util import sms
 
 app = Flask(__name__)
 executor = Executor(app)

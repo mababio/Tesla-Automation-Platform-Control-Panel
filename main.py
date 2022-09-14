@@ -1,12 +1,12 @@
 import requests
 import time
-import sms
+from app import sms
 import os
 from flask import Flask
 from flask import g
 from flask_executor import Executor
-from db_mongo import db_client
-from tesla import Tesla
+from app.db_mongo import db_client
+from app.tesla import Tesla
 
 
 class TAP:

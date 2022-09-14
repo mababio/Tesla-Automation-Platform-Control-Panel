@@ -2,10 +2,7 @@
 # from aiohttp import ClientSession
 # import pymyq
 # import time
-import teslapy
-import json
-import requests
-from tesla import Tesla
+from app.tesla import Tesla
 #
 tesla_obj = Tesla()
 print(tesla_obj.set_temp('25'))

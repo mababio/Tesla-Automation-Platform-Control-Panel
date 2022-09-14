@@ -33,6 +33,7 @@ class TAP:
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
+            sms.send_sms('after after ELSE')
             if not self.garage_isopen() and self.tesla_obj.is_tesla_moving() and not self.tesla.is_on_home_street():
                 sms.send_sms('garage is closed and car is moving and not on home street')
                 return True
@@ -41,6 +42,7 @@ class TAP:
                 self.garage_still_open = True
                 return False
             else:
+                sms.send_sms('after after!!!!!!!')
                 while self.tesla_obj.is_on_home_street() and not self.confirmation_limit == 0:
                     sms.send_sms('car is parked on street with garage closed')
                     time.sleep(5)

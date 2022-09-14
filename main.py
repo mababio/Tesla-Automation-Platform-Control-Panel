@@ -11,13 +11,12 @@ from tesla import Tesla
 class TAP:
 
     def __init__(self):
-        self.proximity_value = None
         self.garage_still_open = None
         self.stil_on_home_street = None
         self.garage_open_limit = 20  # 5mins
         self.confirmation_limit = 20
         self.db = db_client()
-        self.tesla = Tesla()
+        self.tesla_obj = Tesla()
 
     def garage_isopen(self):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
@@ -34,7 +33,7 @@ class TAP:
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
-            if not self.garage_isopen() and self.tesla.is_tesla_moving() and not self.tesla.is_on_home_street():
+            if not self.garage_isopen() and self.tesla_obj.is_tesla_moving() and not self.tesla.is_on_home_street():
                 sms.send_sms('garage is closed and car is moving and not on home street')
                 return True
             elif self.garage_isopen() and self.garage_open_limit == 0:
@@ -42,12 +41,12 @@ class TAP:
                 self.garage_still_open = True
                 return False
             else:
-                while self.tesla.is_on_home_street() and not self.confirmation_limit == 0:
+                while self.tesla_obj.is_on_home_street() and not self.confirmation_limit == 0:
                     sms.send_sms('car is parked on street with garage closed')
                     time.sleep(5)
                     self.confirmation_limit -= 5
                 else:
-                    if not self.tesla.is_on_home_street():  # not on home street
+                    if not self.tesla_obj.is_on_home_street():  # not on home street
                         sms.send_sms('Not sure about this case, but returning true')
                         return True
                     else:
@@ -71,18 +70,18 @@ class TAP:
 
     def tesla_home_automation_engine(self):
         while not self.telsa.is_close():
-            if self.proximity_value < .07:
+            if self.tesla_obj.proximity_value < .07:
                 continue
-            elif self.proximity_value < 1:
+            elif self.tesla_obj.proximity_value < 1:
                 sms.send_sms("Delay for 1 secs")
                 time.sleep(1)
-            elif self.proximity_value < 2:
+            elif self.tesla_obj.proximity_value < 2:
                 sms.send_sms("Delay for 15 sec")
                 time.sleep(15)
-            elif self.proximity_value < 3:
+            elif self.tesla_obj.proximity_value < 3:
                 sms.send_sms("Delay for 2 mins")
                 time.sleep(120)
-            elif self.proximity_value < 7:
+            elif self.tesla_obj.proximity_value < 7:
                 sms.send_sms("Delay for 5 mins")
                 time.sleep(300)
             else:

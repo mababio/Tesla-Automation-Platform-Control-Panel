@@ -140,7 +140,9 @@ def garage_door_closed():
 
 
 def tesla_automation():
+    sms.send_sms('before!')
     tesla_tap = TAP()
+    sms.send_sms('after!')
     if tesla_tap.confirmation_before_armed():
         sms.send_sms('trigger tesla home automation!')
         tesla_tap.tesla_home_automation_engine()

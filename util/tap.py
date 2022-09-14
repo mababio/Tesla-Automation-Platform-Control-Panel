@@ -1,8 +1,13 @@
 import requests
 import time
-from . import sms
-from . import db_mongo
-from . import tesla
+import sys
+#sys.path.append("..")
+import util.sms as sms
+#from . \
+import util.db_mongo as db_mongo
+import util.tesla as tesla
+
+
 
 
 class TAP:
@@ -13,7 +18,7 @@ class TAP:
         self.garage_open_limit = 20  # 5mins
         self.confirmation_limit = 20
         self.db = db_mongo.db_client()
-        self.tesla_obj = tesla.Tesla
+        self.tesla_obj = tesla.Tesla()
 
     def garage_isopen(self):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"

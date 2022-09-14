@@ -2,7 +2,9 @@ import requests
 from retry import retry
 import googlemaps
 import threading
-from  . import  db_mongo
+import sys
+sys.path.insert(0, 'db_mongo')
+import util.db_mongo as db_mongo
 
 
 class Tesla:
@@ -76,7 +78,8 @@ REMOVED
                 return True
         return False
 
+
 if __name__ == "__main__":
     obj = Tesla()
-    print(obj.get_location())
-    print(obj.is_on_home_street())
+    # print(obj.get_location())
+    # print(obj.is_on_home_street())

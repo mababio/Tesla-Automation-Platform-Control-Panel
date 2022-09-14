@@ -30,9 +30,10 @@ REMOVED
         return self.tesla_database['garage'].find_one()['closed_reason']
 
     def save_location(self,lat,lon):
-        time.sleep(20)
-        print('done!!!')
-        # save latlong to mongodb
+        myquery = {"_id": 'current'}
+        newvalues = {"$set": {"lat": lat, "lon":lon, "timestamp":time.time()}}
+        self.tesla_database['tesla_location'].update_one(myquery, newvalues)
+
 
 
 

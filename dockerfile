@@ -2,8 +2,8 @@ FROM python:3.10-slim
 # Copy local code to the container image.
 ENV APP_HOME /app
 WORKDIR $APP_HOME
-COPY app ./
-# COPY main.py ./
+COPY app  app/
+COPY main.py ./
 # Copy tesla.py ./
 # COPY db_mongo.py ./
 # COPY sms.py ./

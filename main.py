@@ -33,6 +33,7 @@ class TAP:
             return True
 
     def confirmation_before_armed(self):
+        sms.send_sms('after after')
         while self.garage_isopen() and not self.garage_open_limit == 0:
             sms.send_sms('Checking if still open for 5 mins' + str(self.garage_open_limit))
             time.sleep(5)

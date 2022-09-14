@@ -1,8 +1,8 @@
 import requests
 import time
-from app import sms
-from app.db_mongo import db_client
-from app.tesla import Tesla
+import sms
+from db_mongo import db_client
+from tesla import Tesla
 
 
 class TAP:

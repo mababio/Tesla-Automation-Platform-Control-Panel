@@ -19,7 +19,6 @@ class TAP:
         self.db = db_client()
         self.tesla_obj = Tesla()
 
-
     def garage_isopen(self):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
         param = {"isopen": ''}
@@ -70,7 +69,7 @@ class TAP:
         self.db.set_door_close_status("came_home")
 
     def tesla_home_automation_engine(self):
-        while not self.telsa.is_close():
+        while not self.tesla_obj.is_close():
             if self.tesla_obj.proximity_value < .07:
                 continue
             elif self.tesla_obj.proximity_value < 1:

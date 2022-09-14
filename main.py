@@ -29,13 +29,11 @@ class TAP:
             return True
 
     def confirmation_before_armed(self):
-        sms.send_sms('after after')
         while self.garage_isopen() and not self.garage_open_limit == 0:
             sms.send_sms('Checking if still open for 5 mins' + str(self.garage_open_limit))
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
-            sms.send_sms('after after ELSE')
             if not self.garage_isopen() and self.tesla_obj.is_tesla_moving() and not self.tesla_obj.is_on_home_street():
                 sms.send_sms('garage is closed and car is moving and not on home street')
                 return True
@@ -44,7 +42,6 @@ class TAP:
                 self.garage_still_open = True
                 return False
             else:
-                sms.send_sms('after after!!!!!!!')
                 while self.tesla_obj.is_on_home_street() and not self.confirmation_limit == 0:
                     sms.send_sms('car is parked on street with garage closed')
                     time.sleep(5)
@@ -139,9 +136,7 @@ def garage_door_closed():
 
 
 def tesla_automation():
-    sms.send_sms('before!')
     tesla_tap = TAP()
-    sms.send_sms('after!')
     if tesla_tap.confirmation_before_armed():
         sms.send_sms('trigger tesla home automation!')
         tesla_tap.tesla_home_automation_engine()

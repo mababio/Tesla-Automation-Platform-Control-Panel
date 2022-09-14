@@ -1,23 +1,27 @@
 import requests
 from retry import retry
+import googlemaps
 
 
 class Tesla:
 
     def __init__(self):
-        hold = 1
+        self.hold = 1
+REMOVED
+        self.url_tesla_prox = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox"
+        self.url_tesla_location = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-get_location"
+        self.proximity_value = None
 
-    def set_temp(self,temp):
-        return True
-
-
-    def is_tesla_ready_for_climate_on(self):
-        return True
-
-
-    def is_dog_in_car(self):
-        return True
-
+    # def set_temp(self,temp):
+    #     return True
+    #
+    #
+    # def is_tesla_ready_for_climate_on(self):
+    #     return True
+    #
+    #
+    # def is_dog_in_car(self):
+    #     return True
 
     def is_tesla_moving(self):
         speed = requests.post(self.url_tesla_location).json()['speed']

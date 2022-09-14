@@ -2,8 +2,7 @@ import requests
 from retry import retry
 import googlemaps
 import time
-import sms
-import os
+from app import sms
 from flask import Flask
 from flask_executor import Executor
 import pymongo
@@ -50,7 +49,7 @@ REMOVED
         else:
             #sms.send_sms(number,'either is still open or checked if open for more then 5 mins OR garage is closed')
             if not self.garage_isopen() and self.is_tesla_moving() and not self.isOnHomeStreet():
-                sms.send_sms(number,'garage is closed and car is moving and not on home street')
+                sms.send_sms(number, 'garage is closed and car is moving and not on home street')
                 return True
             elif self.garage_isopen() and self.garage_open_limit == 0:
                 sms.send_sms(number, 'garage has been open for more than 5 mins and we are terminating confirmation function')
@@ -58,12 +57,12 @@ REMOVED
                 return False
             else:
                 while self.isOnHomeStreet() and not self.confirmation_limit == 0:
-                    sms.send_sms(number,'car is parked on street with garage closed')
+                    sms.send_sms(number, 'car is parked on street with garage closed')
                     time.sleep(5)
                     self.confirmation_limit -= 5
                 else:
                     if not self.isOnHomeStreet(): # not on home street
-                        sms.send_sms(number,'Not sure about this case, but returning true')
+                        sms.send_sms(number, 'Not sure about this case, but returning true')
                         return True
                     else:
                         self.stil_on_home_street = True
@@ -126,7 +125,7 @@ REMOVED
             sms.send_sms(number, 'Garage door opening!')
             self.setIFTTT_TRIGGER_LOCK("False")
         else:
-            sms.send_sms(number,'is close, but not on home street')
+            sms.send_sms(number, 'is close, but not on home street')
 
     def tesla_home_automation_engine(self):
         proximity_value = self.get_proximity()
@@ -140,7 +139,7 @@ REMOVED
                 time.sleep(15)
                 proximity_value = self.get_proximity()
             elif proximity_value < 3:
-                sms.send_sms(number,"Delay for 2 mins")
+                sms.send_sms(number, "Delay for 2 mins")
                 time.sleep(120)
                 proximity_value = self.get_proximity()
             elif proximity_value < 7:

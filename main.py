@@ -1,6 +1,4 @@
 import requests
-
-import googlemaps
 import time
 import sms
 import os
@@ -16,9 +14,6 @@ class TAP:
         self.proximity_value = None
         self.garage_still_open = None
         self.stil_on_home_street = None
-        self.url_tesla_prox = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox"
-        self.url_tesla_location = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-get_location"
-        self.gmaps = googlemaps.Client(key='AIzaSyCpSgkND8wBAdlK8sSaqjgqFMPx7AJmq68')
         self.garage_open_limit = 20  # 5mins
         self.confirmation_limit = 20
         self.db = db_client()

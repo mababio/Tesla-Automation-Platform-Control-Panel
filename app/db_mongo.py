@@ -1,7 +1,7 @@
 import pymongo
 from pymongo.server_api import ServerApi
 # import asyncio
-# import time
+import time
 
 
 class db_client:
@@ -29,10 +29,10 @@ class db_client:
     def get_door_close_status(self):
         return self.tesla_database['garage'].find_one()['closed_reason']
 
-    # def save_location(self):
-    #     time.sleep(1)
-    #     print('done!!!')
-    #     # save latlong to mongodb
+    def save_location(self,lat,lon):
+        time.sleep(20)
+        print('done!!!')
+        # save latlong to mongodb
 
 
 

@@ -4,7 +4,7 @@ from flask import Flask
 from flask import g
 from flask_executor import Executor
 from app.db_mongo import db_client
-from app.tap import TAP
+import app.tap as tap
 
 app = Flask(__name__)
 executor = Executor(app)
@@ -50,7 +50,7 @@ def garage_door_closed():
 
 
 def tesla_automation():
-    tesla_tap = TAP()
+    tesla_tap = tap.TAP()
     if tesla_tap.confirmation_before_armed():
         sms.send_sms('trigger tesla home automation!')
         tesla_tap.tesla_home_automation_engine()

@@ -1,6 +1,8 @@
 import requests
 from retry import retry
 import googlemaps
+import threading
+from  . import  db_mongo
 
 
 class Tesla:
@@ -12,6 +14,7 @@ class Tesla:
         self.url_tesla_location = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-get_location"
         self.proximity_value = None
         self.url_tesla_set_temp = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-set-temp"
+        self.db = db_mongo.db_client()
 
     def set_temp(self, temp='22.7778'):
         param = {"temp": temp}
@@ -60,6 +63,8 @@ class Tesla:
         r_location = requests.post(self.url_tesla_location)
         lat = float(r_location.json()['lat'])
         lon = float(r_location.json()['lon'])
+        x = threading.Thread(target=self.db.save_location, args=(lat,lon))
+        x.start()
         param_prox = {"lat": lat, "lon": lon}
         return param_prox
 
@@ -70,3 +75,8 @@ class Tesla:
             if 'Arcuri Court' in i['address_components'][0]['long_name']:
                 return True
         return False
+
+if __name__ == "__main__":
+    obj = Tesla()
+    print(obj.get_location())
+    print(obj.is_on_home_street())

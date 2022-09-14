@@ -8,6 +8,7 @@ from flask_executor import Executor
 from db_mongo import db_client
 from tesla import Tesla
 
+
 class TAP:
 
     def __init__(self):
@@ -17,6 +18,7 @@ class TAP:
         self.confirmation_limit = 20
         self.db = db_client()
         self.tesla_obj = Tesla()
+
 
     def garage_isopen(self):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
@@ -34,7 +36,7 @@ class TAP:
             self.garage_open_limit -= 5
         else:
             sms.send_sms('after after ELSE')
-            if not self.garage_isopen() and self.tesla_obj.is_tesla_moving() and not self.tesla.is_on_home_street():
+            if not self.garage_isopen() and self.tesla_obj.is_tesla_moving() and not self.tesla_obj.is_on_home_street():
                 sms.send_sms('garage is closed and car is moving and not on home street')
                 return True
             elif self.garage_isopen() and self.garage_open_limit == 0:

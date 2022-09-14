@@ -1,11 +1,33 @@
+import asyncio
+import time
+
+
+async def add(x, y):
+    time.sleep(2)
+    return x + y
+
+
+async def add1(x, y):
+    return x + y
+
+async def get_results():
+    res1 =  add(3, 4)
+    res2 = await add1(8, 5)
+
+    print(res1, res2)
+
+asyncio.run(get_results())
+
+
+
 # import asyncio
 # from aiohttp import ClientSession
 # import pymyq
 # import time
-from app.tesla import Tesla
-#
-tesla_obj = Tesla()
-print(tesla_obj.set_temp('25'))
+# from app.tesla import Tesla
+# #
+# tesla_obj = Tesla()
+# print(tesla_obj.set_temp('25'))
 # print(tesla_obj.tesla.is_on_home_street())
 #
 # def tesla_get_location():

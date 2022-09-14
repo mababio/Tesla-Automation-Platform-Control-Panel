@@ -4,21 +4,27 @@
 # import time
 import teslapy
 import json
+import requests
+from tesla import Tesla
+#
+tesla_obj = Tesla()
+print(tesla_obj.set_temp('25'))
+# print(tesla_obj.tesla.is_on_home_street())
+#
+# def tesla_get_location():
+#     with teslapy.Tesla('michaelkwasi@gmail.com') as tesla:
+#         vehicles = tesla.vehicle_list()
+#         vehicles[0].sync_wake_up()
+#         professor = vehicles[0]
+#         tesla_data_climate = professor.api('VEHICLE_DATA')['response']['climate_state']
+#         if not tesla_data_climate['is_climate_on']:
+#             professor.command('CLIMATE_ON')
+#         professor.command('CHANGE_CLIMATE_TEMPERATURE_SETTING', driver_temp='22.7778', passenger_temp='22.7778')
+#
+#         return  tesla_data_climate
+#     #return str(tuple_latlon)
 
-def tesla_get_location():
-    with teslapy.Tesla('michaelkwasi@gmail.com') as tesla:
-        vehicles = tesla.vehicle_list()
-        vehicles[0].sync_wake_up()
-        professor = vehicles[0]
-        tesla_data_climate = professor.api('VEHICLE_DATA')['response']['climate_state']
-        if not tesla_data_climate['is_climate_on']:
-            professor.command('CLIMATE_ON')
-        professor.command('CHANGE_CLIMATE_TEMPERATURE_SETTING', driver_temp='22.7778', passenger_temp='22.7778')
-
-        return  tesla_data_climate
-    #return str(tuple_latlon)
-
-print(tesla_get_location())
+#print(tesla_get_location())
 # latlon = self.getlocation()
 # lat = latlon['lat']
 # lon = latlon['lon']
@@ -34,12 +40,13 @@ print(tesla_get_location())
 # import requests
 # import time
 #
-# url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
-# param = {"state": 'cd'}
-# start = time.time()
-# requests.post(url_myq_garage, json=param).json()
-# end = time.time()
-# print(end - start)
+# url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-set-temp"
+#
+# param = {"temp": '22'}
+#
+# out = requests.post(url_myq_garage, json=param)
+#
+# print(out)
 
 
 # import requests

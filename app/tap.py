@@ -1,8 +1,8 @@
 import requests
 import time
-import sms
-from db_mongo import db_client
-from tesla import Tesla
+from . import sms
+from . import db_mongo
+from . import tesla
 
 
 class TAP:
@@ -12,8 +12,8 @@ class TAP:
         self.stil_on_home_street = None
         self.garage_open_limit = 20  # 5mins
         self.confirmation_limit = 20
-        self.db = db_client()
-        self.tesla_obj = Tesla()
+        self.db = db_mongo.db_client()
+        self.tesla_obj = tesla.Tesla
 
     def garage_isopen(self):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
@@ -85,3 +85,6 @@ class TAP:
                 time.sleep(900)
         else:
             self.trigger_tesla_home_automation()
+
+if __name__ == "__main__":
+    TAP().garage('close')

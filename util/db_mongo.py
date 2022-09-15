@@ -10,7 +10,6 @@ class DBClient:
         try:
             client = pymongo.MongoClient("mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
             self.tesla_database = client['tesla']
-            raise Exception
         except Exception as e:
             logger.error("Issue with connecting to Mongodb: " + str(e))
             raise

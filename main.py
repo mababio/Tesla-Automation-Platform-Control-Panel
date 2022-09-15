@@ -13,7 +13,10 @@ executor = Executor(app)
 
 @app.before_request
 def before_request():
-    g.db = DBClient()
+    try:
+        g.db = DBClient()
+    except Exception as e:
+        sms.send_sms('Faced DB connectivity issue' + str(e))
 
 
 @app.route("/open")

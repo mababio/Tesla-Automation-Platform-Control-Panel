@@ -7,8 +7,12 @@ from util.logs import logger
 class DBClient:
 
     def __init__(self):
+        try:
 REMOVED
-        self.tesla_database = client['tesla']
+            self.tesla_database = client['tesla']
+            raise Exception
+        except Exception as e:
+            logger.error("Issue with connecting to Mongodb: " + str(e))
 
     def get_tesla_database(self):
         return self.tesla_database

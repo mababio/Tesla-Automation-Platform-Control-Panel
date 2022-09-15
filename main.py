@@ -19,7 +19,6 @@ def before_request():
         sms.send_sms('Faced DB connectivity issue' + str(e))
         raise
 
-
 @app.route("/open")
 def kick_off_job_ifttt_open_bg():
     logger.debug('kick_off_job_ifttt_open_bg: start of the /open flask route')

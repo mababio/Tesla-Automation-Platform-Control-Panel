@@ -10,7 +10,6 @@ class DBClient:
         try:
 REMOVED
             self.tesla_database = client['tesla']
-            raise Exception
         except Exception as e:
             logger.error("Issue with connecting to Mongodb: " + str(e))
             raise

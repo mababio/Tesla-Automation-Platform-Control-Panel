@@ -17,6 +17,7 @@ def before_request():
         g.db = DBClient()
     except Exception as e:
         sms.send_sms('Faced DB connectivity issue' + str(e))
+        raise
 
 
 @app.route("/open")

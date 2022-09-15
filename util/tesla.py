@@ -16,7 +16,8 @@ class Tesla:
         self.url_tesla_location = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-get_location"
         self.proximity_value = None
         self.url_tesla_set_temp = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-set-temp"
-        self.db = db_mongo.db_client()
+        self.db = db_mongo.DBClient()
+
     @retry(logger=logger, delay=0, tries=3)
     def set_temp(self, temp='22.7778'):
         param = {"temp": temp}

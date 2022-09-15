@@ -2,10 +2,10 @@ import os
 from flask import Flask
 from flask import g
 from flask_executor import Executor
-#from app.db_mongo import db_client
-from util.db_mongo import db_client
+from util.db_mongo import DBClient
 from util import tap
 from util import sms
+from util.logs import logger
 
 app = Flask(__name__)
 executor = Executor(app)
@@ -13,11 +13,12 @@ executor = Executor(app)
 
 @app.before_request
 def before_request():
-    g.db = db_client()
+    g.db = DBClient()
 
 
 @app.route("/open")
 def kick_off_job_ifttt_open_bg():
+    logger.debug('kick_off_job_ifttt_open_bg: start of the /open flask route')
     if g.db.get_tesla_database()['tesla_trigger'].find_one()['lock'] == 'False':
         myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
         newvalues = {"$set": {"lock": "True"}}

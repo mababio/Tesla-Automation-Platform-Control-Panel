@@ -1,13 +1,8 @@
 import requests
 import time
-import sys
-#sys.path.append("..")
-import util.sms as sms
-#from . \
 import util.db_mongo as db_mongo
+import util.sms as sms
 import util.tesla as tesla
-
-
 
 
 class TAP:
@@ -54,8 +49,6 @@ class TAP:
                         self.stil_on_home_street = True
                         return False
 
-
-
     def garage(self, state):
         url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
         param = {"state": state}
@@ -91,5 +84,12 @@ class TAP:
         else:
             self.trigger_tesla_home_automation()
 
+
 if __name__ == "__main__":
-    TAP().garage('close')
+    obj = TAP()
+    print(obj.tesla_obj.is_close())
+    #print(obj.tesla_obj.proximity_value)
+    sms.send_sms("Delay for 1 secsss")
+    time.sleep(1)
+
+

@@ -48,7 +48,7 @@ class DBClient:
             myquery = {"_id": 'current'}
             new_values = {"$set": {"lat": lat, "lon": lon, "timestamp": str(datetime.now())}}
             self.tesla_database['tesla_location'].update_one(myquery, new_values)
-            logger.info('save_location: Current lat lon values are the same as dbmongo values')
+            logger.info('save_location: updating latlong to dbmongo ')
         else:
             logger.info('save_location: Current lat lon values are the same as dbmongo values')
 

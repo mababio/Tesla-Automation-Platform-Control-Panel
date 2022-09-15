@@ -12,7 +12,7 @@ class TAP:
         self.stil_on_home_street = None
         self.garage_open_limit = 20  # 5mins
         self.confirmation_limit = 20
-        self.db = db_mongo.db_client()
+        self.db = db_mongo.DBClient()
         self.tesla_obj = tesla.Tesla()
 
     def garage_isopen(self):

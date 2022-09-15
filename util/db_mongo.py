@@ -13,6 +13,7 @@ class DBClient:
             raise Exception
         except Exception as e:
             logger.error("Issue with connecting to Mongodb: " + str(e))
+            raise
 
     def get_tesla_database(self):
         return self.tesla_database

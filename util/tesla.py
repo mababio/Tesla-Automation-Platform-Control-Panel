@@ -1,3 +1,4 @@
+import json
 import logging
 
 import requests
@@ -49,11 +50,7 @@ class Tesla:
         return_value = self.get_proximity()
         self.proximity_value = return_value['difference']
         return True if return_value['is_on_arcuri'] and return_value['is_close'] else False
-        # if return_value['is_on_arcuri'] and return_value['is_close']:
-        #     return True
-        # else:
-        #     return False
-    #
+
     @retry(logger=logger, delay=0, tries=2)
     def get_proximity(self):
         param_prox = self.get_location()
@@ -83,13 +80,10 @@ class Tesla:
             sms.send_sms('get_location latlon= values are not valid:' + str(e))
             raise
         try:
-            x = threading.Thread(target=self.db.save_location, args=(lat, lon))
-            x.start()
+            self.db.save_location(r_location.json())
         except Exception as e:
-            logger.error("Issue with thread for saving latlon to mongodb:" + str(e))
-            sms.send_sms("Issue with thread for saving latlon to mongodb:" + str(e))
-
-            raise
+            logger.error("Issue with saving latlon to mongodb:" + str(e))
+            sms.send_sms("Issue with  saving latlon to mongodb:" + str(e))
         return param_prox
 
     @retry(logger=logging.Logger, delay=2, tries=3)
@@ -109,9 +103,5 @@ class Tesla:
 
 
 if __name__ == "__main__":
-
-    while True:
-        obj = Tesla()
-        print(obj.get_proximity())
-    # print(obj.get_location())
-    # print(obj.is_on_home_street())
+    obj = Tesla()
+    obj.get_location()

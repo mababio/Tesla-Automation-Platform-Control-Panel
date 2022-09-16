@@ -47,9 +47,8 @@ class DBClient:
         return self.tesla_database['tesla_location'].find_one({'_id':'current'})
 
     def save_location(self, json_lat_lon):
-        if isinstance(json_lat_lon,dict):
+        if isinstance(json_lat_lon, dict):
             data_str = json.dumps(json_lat_lon)
-            logger.error("save_location::::: Type <dict> was not provided")
         else:
             logger.error("save_location::::: Type dict was not provided")
             raise TypeError("save_location::::: Type dict was not provided")

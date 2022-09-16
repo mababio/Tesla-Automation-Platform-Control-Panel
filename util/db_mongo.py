@@ -15,7 +15,10 @@ REMOVED
             raise
 
     def get_tesla_database(self):
-        return self.tesla_database
+        try:
+            return self.tesla_database
+        except Exception as e:
+            logger.error("get_tesla_database: Error getting mongodb client conn to DB " + str(e))
 
     def set_ifttt_trigger_lock(self,bolval):
         myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
@@ -38,19 +41,23 @@ REMOVED
         return self.tesla_database['garage'].find_one()['closed_reason']
 
     def __get_saved_location(self):
-        return self.tesla_database['tesla_location'].find_one()
+        return self.tesla_database['tesla_location'].find_one({'_id':'current'})
 
     def save_location(self, lat, lon):
-        return_saved_location = self.__get_saved_location()
-        lat_current_saved = return_saved_location['lat']
-        lon_current_saved = return_saved_location['lon']
-        if lat != lat_current_saved and lon != lon_current_saved:
-            myquery = {"_id": 'current'}
-            new_values = {"$set": {"lat": lat, "lon": lon, "timestamp": str(datetime.now())}}
-            self.tesla_database['tesla_location'].update_one(myquery, new_values)
-            logger.info('save_location: updating latlong to dbmongo ')
-        else:
-            logger.info('save_location: Current lat lon values are the same as dbmongo values')
+        try:
+            return_saved_location = self.__get_saved_location()
+            lat_current_saved = return_saved_location['lat']
+            lon_current_saved = return_saved_location['lon']
+            if lat != lat_current_saved and lon != lon_current_saved:
+                myquery = {"_id": 'current'}
+                new_values = {"$set": {"lat": lat, "lon": lon, "timestamp": str(datetime.now())}}
+                self.tesla_database['tesla_location'].update_one(myquery, new_values)
+                logger.info('save_location: updating latlong to dbmongo ')
+            else:
+                logger.info('save_location: Current lat lon values are the same as dbmongo values')
+        except Exception as e:
+            logger.error('save_location method error:' + str(e))
+            raise
 
 
 

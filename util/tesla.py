@@ -6,6 +6,7 @@ import googlemaps
 import threading
 import util.db_mongo as db_mongo
 from util.logs import logger
+import util.sms as sms
 
 
 class Tesla:
@@ -57,17 +58,21 @@ REMOVED
     def get_proximity(self):
         param_prox = self.get_location()
         if isinstance(param_prox, dict):
-            return requests.post(self.url_tesla_prox, json=param_prox).json()
+            try:
+                return requests.post(self.url_tesla_prox, json=param_prox).json()
+            except Exception as e:
+                logger.error('get_proximity: tesla prox function error')
+                raise
         else:
             raise TypeError('get_location GCP function return something other than dict')
-
 
     @retry(logger=logger, delay=2, tries=2)
     def get_location(self):
         try:
             r_location = requests.post(self.url_tesla_location)
-        except requests.exceptions.RequestException as e:
-            logger.warning('Connection issue with' + self.url_tesla_location + ":" + str(e))
+        except Exception as e:
+            logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
+            sms.send_sms('Connection issue with' + self.url_tesla_location + ":" + str(e))
             raise
         try:
             lat = float(r_location.json()['lat'])
@@ -75,12 +80,15 @@ REMOVED
             param_prox = {"lat": lat, "lon": lon}
         except Exception as e:
             logger.warning('get_location latlon= values are not valid:' + str(e))
+            sms.send_sms('get_location latlon= values are not valid:' + str(e))
             raise
         try:
             x = threading.Thread(target=self.db.save_location, args=(lat, lon))
             x.start()
         except Exception as e:
             logger.error("Issue with thread for saving latlon to mongodb:" + str(e))
+            sms.send_sms("Issue with thread for saving latlon to mongodb:" + str(e))
+
             raise
         return param_prox
 

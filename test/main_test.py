@@ -2,7 +2,7 @@ import requests
 from retry import retry
 import googlemaps
 import time
-from app import sms
+from util import sms
 from flask import Flask
 from flask_executor import Executor
 import pymongo

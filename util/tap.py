@@ -1,8 +1,12 @@
 import requests
 import time
+
+from retry import retry
+
 import util.db_mongo as db_mongo
 import util.sms as sms
 import util.tesla as tesla
+from util.logs import logger
 
 
 class TAP:
@@ -62,27 +66,33 @@ class TAP:
         sms.send_sms('Setinng job done')
         self.db.set_door_close_status("came_home")
 
+    @retry(logger=logger, delay=3, tries=2)
     def tesla_home_automation_engine(self):
-        while not self.tesla_obj.is_close():
-            if self.tesla_obj.proximity_value < .07:
-                continue
-            elif self.tesla_obj.proximity_value < 1:
-                sms.send_sms("Delay for 1 secs")
-                time.sleep(1)
-            elif self.tesla_obj.proximity_value < 2:
-                sms.send_sms("Delay for 15 sec")
-                time.sleep(15)
-            elif self.tesla_obj.proximity_value < 3:
-                sms.send_sms("Delay for 2 mins")
-                time.sleep(120)
-            elif self.tesla_obj.proximity_value < 7:
-                sms.send_sms("Delay for 5 mins")
-                time.sleep(300)
+        try:
+            while not self.tesla_obj.is_close():
+                if self.tesla_obj.proximity_value < .07:
+                    continue
+                elif self.tesla_obj.proximity_value < 1:
+                    sms.send_sms("Delay for 1 secs")
+                    time.sleep(1)
+                elif self.tesla_obj.proximity_value < 2:
+                    sms.send_sms("Delay for 15 sec")
+                    time.sleep(15)
+                elif self.tesla_obj.proximity_value < 3:
+                    sms.send_sms("Delay for 2 mins")
+                    time.sleep(120)
+                elif self.tesla_obj.proximity_value < 7:
+                    sms.send_sms("Delay for 5 mins")
+                    time.sleep(300)
+                else:
+                    sms.send_sms("Delay for 15 mins")
+                    time.sleep(900)
             else:
-                sms.send_sms("Delay for 15 mins")
-                time.sleep(900)
-        else:
-            self.trigger_tesla_home_automation()
+                self.trigger_tesla_home_automation()
+        except Exception as e:
+            sms.send_sms('tesla_home_automation_engine: Issue found in the while loop')
+            logger.error('tesla_home_automation_engine: Issue found in the while loop')
+            raise
 
 
 if __name__ == "__main__":

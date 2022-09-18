@@ -66,7 +66,7 @@ class TAP:
         sms.send_sms('Setinng job done')
         self.db.set_door_close_status("came_home")
 
-    @retry(logger=logger, delay=3, tries=2)
+    @retry(logger=logger, delay=300, tries=3)
     def tesla_home_automation_engine(self):
         try:
             while not self.tesla_obj.is_close():

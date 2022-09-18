@@ -99,7 +99,7 @@ if __name__ == "__main__":
     obj = TAP()
     print(obj.tesla_obj.is_close())
     #print(obj.tesla_obj.proximity_value)
-    sms.send_sms("Delay for 1 secsss")
-    time.sleep(1)
+    #sms.send_sms("Delay for 1 secsss")
+    #time.sleep(1)
 
 

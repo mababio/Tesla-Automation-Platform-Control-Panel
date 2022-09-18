@@ -2,12 +2,14 @@ import json
 import logging
 
 import requests
+import teslapy
 from retry import retry
 import googlemaps
 import threading
 import util.db_mongo as db_mongo
 from util.logs import logger
 import util.sms as sms
+import custom as mababio_teslapy
 
 
 class Tesla:
@@ -71,21 +73,22 @@ class Tesla:
     @retry(logger=logger, delay=2, tries=2)
     def get_location(self):
         try:
-            r_location = requests.post(self.url_tesla_location)
+            # r_location = requests.get(self.url_tesla_location)
+            r_location = self.tesla_get_location()
         except Exception as e:
             logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
             sms.send_sms('Connection issue with' + self.url_tesla_location + ":" + str(e))
             raise
         try:
-            lat = float(r_location.json()['lat'])
-            lon = float(r_location.json()['lon'])
+            lat = float(r_location['lat'])
+            lon = float(r_location['lon'])
             param_prox = {"lat": lat, "lon": lon}
         except Exception as e:
             logger.warning('get_location latlon= values are not valid:' + str(e))
             sms.send_sms('get_location latlon= values are not valid:' + str(e))
             raise
         try:
-            self.db.save_location(r_location.json())
+            self.db.save_location(r_location)
         except Exception as e:
             logger.error("Issue with saving latlon to mongodb:" + str(e))
             sms.send_sms("Issue with  saving latlon to mongodb:" + str(e))
@@ -106,9 +109,26 @@ class Tesla:
         except Exception as e:
             logger.warning("is_on_home_street: output of geocode is not as expected:"+ str(e))
 
+    def tesla_get_location(self):
+        with mababio_teslapy.Tesla('michaelkwasi@gmail.com') as tesla:
+            vehicles = tesla.vehicle_list()
+            vehicles[0].sync_wake_up()
+            tesla_data = vehicles[0].api('VEHICLE_DATA')['response']['drive_state']
+            lat = str(tesla_data['latitude'])
+            lon = str(tesla_data['longitude'])
+            data = {'lat': lat, 'lon': lon, 'speed':tesla_data['speed']}
+            # data[] = lat
+            # data['lon'] = lon
+            # data['speed'] = tesla_data['speed']
+            #json_data = json.dumps(data)
+        #return json.loads(json_data)
+        return data
+
 
 if __name__ == "__main__":
     obj = Tesla()
-    #obj.is_battery_good()
-    latlon = obj.get_location()
-    print(latlon)
+    val =  obj.tesla_get_location()
+    val_type =  type(val)
+    print(val)
+    print(val_type)
+    print(obj.is_on_home_street())

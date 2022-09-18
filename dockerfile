@@ -3,6 +3,7 @@ FROM python:3.10-slim
 ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY util  util/
+COPY custom custom/
 COPY main.py ./
 COPY requirement.txt ./
 RUN pip install --no-cache-dir -r  requirement.txt

@@ -4,7 +4,7 @@ from flask import g
 from flask_executor import Executor
 from util.db_mongo import DBClient
 from util import tap
-from util import sms
+from util import notification
 from util.logs import logger
 
 app = Flask(__name__)
@@ -16,8 +16,9 @@ def before_request():
     try:
         g.db = DBClient()
     except Exception as e:
-        sms.send_push_notification('Faced DB connectivity issue' + str(e))
+        notification.send_push_notification('Faced DB connectivity issue' + str(e))
         raise
+
 
 @app.route("/open")
 def kick_off_job_ifttt_open_bg():
@@ -29,7 +30,7 @@ def kick_off_job_ifttt_open_bg():
         executor.submit(tesla_automation)
         return 'Scheduled a job'
     else:
-        sms.send_push_notification("Process is already running")
+        notification.send_push_notification("Process is already running")
         return 'Process is already running'
 
 
@@ -37,10 +38,10 @@ def kick_off_job_ifttt_open_bg():
 def kick_off_job_ifttt_close_bg():
     if g.db.get_door_close_status() == 'came_home':
         executor.submit(garage_door_closed)
-        sms.send_push_notification('Car has arrive and door was closed')
+        notification.send_push_notification('Car has arrive and door was closed')
         return 'Car has arrive and door was closed'
     else:
-        sms.send_push_notification('Door was not closed b/c car came home')
+        notification.send_push_notification('Door was not closed b/c car came home')
         return 'Door was not closed b/c car came home'
 
 
@@ -57,17 +58,17 @@ def garage_door_closed():
 def tesla_automation():
     tesla_tap = tap.TAP()
     if tesla_tap.confirmation_before_armed():
-        sms.send_push_notification('trigger tesla home automation!')
+        notification.send_push_notification('trigger tesla home automation!')
         tesla_tap.tesla_home_automation_engine()
-        sms.send_push_notification('automation Done')
+        notification.send_push_notification('automation Done')
     elif tesla_tap.garage_still_open:
-        sms.send_push_notification(' Garage door has been open for 5 mins. would your like to close, '
-                     'leave open or are you'
-                     ' loading the bikes??')
-        sms.send_push_notification('automation Done')
+        notification.send_push_notification(' Garage door has been open for 5 mins. would your like to close, '
+                                            'leave open or are you'
+                                            ' loading the bikes??')
+        notification.send_push_notification('automation Done')
     elif tesla_tap.stil_on_home_street:
-        sms.send_push_notification('limit of 5 mins has been meet or still on Arcui ct')
-        sms.send_push_notification('automation Done')
+        notification.send_push_notification('limit of 5 mins has been meet or still on Arcui ct')
+        notification.send_push_notification('automation Done')
     tesla_tap.cleanup()
 
 

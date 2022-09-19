@@ -1,15 +1,11 @@
-#import json
 import logging
-
 import requests
-#import teslapy
 from retry import retry
 import googlemaps
-#import threading
 import util.db_mongo as db_mongo
 from util.logs import logger
 import util.sms as sms
-import custom as mababio_teslapy
+
 
 
 class Tesla:
@@ -29,8 +25,8 @@ REMOVED
         return requests.post(self.url_tesla_set_temp, json=param)
 
     def is_battery_good(self):
-        look = requests.get(self.url_tesla_info).json()
-        print(look)
+        battery_range = requests.get(self.url_tesla_info).json()['charge_state']['battery_range']
+        return True if  battery_range > 100 else False
 
 
     # def is_tesla_ready_for_climate_on(self):
@@ -134,8 +130,4 @@ REMOVED
 
 if __name__ == "__main__":
     obj = Tesla()
-    val =  obj.tesla_get_location()
-    val_type =  type(val)
-    print(val)
-    print(val_type)
-    print(obj.is_on_home_street())
+    obj.is_battery_good()

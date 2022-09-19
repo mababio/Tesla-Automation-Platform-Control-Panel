@@ -77,7 +77,7 @@ REMOVED
             r_location = self.tesla_get_location()
         except Exception as e:
             logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
-            sms.send_sms('Connection issue with' + self.url_tesla_location + ":" + str(e))
+            sms.send_push_notification('Connection issue with' + self.url_tesla_location + ":" + str(e))
             raise
         try:
             lat = float(r_location['lat'])
@@ -85,13 +85,13 @@ REMOVED
             param_prox = {"lat": lat, "lon": lon}
         except Exception as e:
             logger.warning('get_location latlon= values are not valid:' + str(e))
-            sms.send_sms('get_location latlon= values are not valid:' + str(e))
+            sms.send_push_notification('get_location latlon= values are not valid:' + str(e))
             raise
         try:
             self.db.save_location(r_location)
         except Exception as e:
             logger.error("Issue with saving latlon to mongodb:" + str(e))
-            sms.send_sms("Issue with  saving latlon to mongodb:" + str(e))
+            sms.send_push_notification("Issue with  saving latlon to mongodb:" + str(e))
         return param_prox
 
     @retry(logger=logging.Logger, delay=2, tries=3)
@@ -110,21 +110,26 @@ REMOVED
             logger.warning("is_on_home_street: output of geocode is not as expected:"+ str(e))
 
     def tesla_get_location(self):
-        with mababio_teslapy.Tesla('michaelkwasi@gmail.com') as tesla:
-            vehicles = tesla.vehicle_list()
-            vehicles[0].sync_wake_up()
-            tesla_data = vehicles[0].api('VEHICLE_DATA')['response']['drive_state']
-            sms.send_sms(tesla_data)
-            sms.send_sms('ffffffffff')
-            lat = str(tesla_data['latitude'])
-            lon = str(tesla_data['longitude'])
-            data = {'lat': lat, 'lon': lon, 'speed':tesla_data['speed']}
-            # data[] = lat
-            # data['lon'] = lon
-            # data['speed'] = tesla_data['speed']
-            #json_data = json.dumps(data)
-        #return json.loads(json_data)
-        return data
+        try:
+            r_location = requests.get(self.url_tesla_location)
+        except Exception as e:
+            logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
+            sms.send_sms('Connection issue with' + self.url_tesla_location + ":" + str(e))
+            raise
+        try:
+            lat = float(r_location.json()['lat'])
+            lon = float(r_location.json()['lon'])
+            param_prox = {"lat": lat, "lon": lon}
+        except Exception as e:
+            logger.warning('get_location latlon= values are not valid:' + str(e))
+            sms.send_sms('get_location latlon= values are not valid:' + str(e))
+            raise
+        try:
+            self.db.save_location(r_location.json())
+        except Exception as e:
+            logger.error("Issue with saving latlon to mongodb:" + str(e))
+            sms.send_sms("Issue with  saving latlon to mongodb:" + str(e))
+        return param_prox
 
 
 if __name__ == "__main__":

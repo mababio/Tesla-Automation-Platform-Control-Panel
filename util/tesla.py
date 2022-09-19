@@ -59,12 +59,11 @@ class Tesla:
         db_latlon_age_mins = self.__get_db_latlon_age()
         return True if shift_state is None and db_latlon_age_mins > length else False
 
-
     def __get_db_latlon_age(self):
         est = timezone('US/Eastern')
         db_latlon_timestamp_est = self.db.tesla_database['tesla_location'].find_one({'_id':'current'})['timestamp'].split('.')[0]
         db_latlon_timestamp_est_str = str(db_latlon_timestamp_est)
-        db_latlon_timestamp_datetime_obj= datetime.strptime(db_latlon_timestamp_est_str, "%Y-%m-%d %H:%M:%S")
+        db_latlon_timestamp_datetime_obj = datetime.strptime(db_latlon_timestamp_est_str, "%Y-%m-%d %H:%M:%S")
 
         current_timestamp_est_datetime_obj = datetime.now(est)
         current_timestamp_est_datetime_obj_formatted = str(current_timestamp_est_datetime_obj).split('.')[0]
@@ -112,10 +111,10 @@ class Tesla:
         else:
             raise TypeError('get_location GCP function return something other than dict')
 
-    @retry(logger=logger, delay=2, tries=2)
+    @retry(logger=logger, delay=10, tries=3)
     def get_location(self):
         try:
-            r_location = requests.get(self.url_tesla_location)
+            r_location = requests.get(self.url_tesla_location).json()
            # r_location = self.tesla_get_location()
         except Exception as e:
             logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
@@ -176,4 +175,4 @@ class Tesla:
 
 if __name__ == "__main__":
     obj = Tesla()
-    print(obj.is_parked(60))
+    print(obj.get_location())

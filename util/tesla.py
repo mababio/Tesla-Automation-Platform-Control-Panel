@@ -5,7 +5,16 @@ import googlemaps
 import util.db_mongo as db_mongo
 from util.logs import logger
 import util.sms as sms
+from enum import Enum
+from datetime import datetime
+from pytz import timezone
 
+
+class TeslaMode(Enum):
+    HOME = 0
+    AWAY = 1
+    VACATION = 2
+    IN_SERVICE = 3
 
 
 class Tesla:
@@ -19,23 +28,60 @@ REMOVED
         self.url_tesla_info = "https://us-east4-ensure-dev-zone.cloudfunctions.net/tesla-info"
         self.db = db_mongo.DBClient()
 
-    @retry(logger=logger, delay=0, tries=3)
+    @retry(logger=logger, delay=10, tries=3)
     def set_temp(self, temp='22.7778'):
-        param = {"temp": temp}
-        return requests.post(self.url_tesla_set_temp, json=param)
+        try:
+            param = {"temp": temp}
+            return requests.post(self.url_tesla_set_temp, json=param)
+        except Exception as e:
+            logger.warning('Issue calling ' + str(self.url_tesla_set_temp) + ': ' + str(e))
+            raise
 
+    @retry(logger=logger, delay=10, tries=3)
     def is_battery_good(self):
-        battery_range = requests.get(self.url_tesla_info).json()['charge_state']['battery_range']
-        return True if  battery_range > 100 else False
+        try:
+            battery_range = requests.get(self.url_tesla_info).json()['charge_state']['battery_range']
+            return True if battery_range > 100 else False
+        except Exception as e:
+            logger.warning('Issue calling ' + str(self.url_tesla_info) + ': ' + str(e))
+
+    @retry(logger=logger, delay=10, tries=3)
+    def is_in_service(self):
+        try:
+            return requests.get(self.url_tesla_info).json()['in_service']
+        except Exception as e:
+            logger.warning('Issue calling ' + str(self.url_tesla_info) + ': ' + str(e))
+
+
+    @retry(logger=logger, delay=10, tries=3)
+    def is_parked(self,length=5):
+        shift_state = requests.get(self.url_tesla_info).json()['drive_state']['shift_state']
+        db_latlon_age_mins = self.__get_db_latlon_age()
+        return True if shift_state == 'null' and db_latlon_age_mins > (length * 60) else False
+
+
+    def __get_db_latlon_age(self):
+        est = timezone('US/Eastern')
+        db_latlon_timestamp_est = self.tesla_database['tesla_location'].find_one({'_id':'current'})['timestamp'].split('.')[0]
+        db_latlon_timestamp_est_str = str(db_latlon_timestamp_est)
+        db_latlon_timestamp_datetime_obj= datetime.strptime(db_latlon_timestamp_est_str, "%Y-%m-%d %H:%M:%S")
+
+        current_timestamp_est_datetime_obj = datetime.now(est)
+        current_timestamp_est_datetime_obj_formatted = str(current_timestamp_est_datetime_obj).split('.')[0]
+        accepted_current_timestamp_est_datetime_obj = datetime.strptime(current_timestamp_est_datetime_obj_formatted, "%Y-%m-%d %H:%M:%S")
+
+        timelapse = accepted_current_timestamp_est_datetime_obj - db_latlon_timestamp_datetime_obj
+        return int(timelapse.total_seconds()/60) # this is in mins
+
 
 
     # def is_tesla_ready_for_climate_on(self):
     # 1. car is not moving, and parked for a while
  #       - store gps location and add time_share timestamp if hasn't chnage then
     # 2. car is not home
-    # 3. battery is good enough
-    # 4. not in vacation mode - save to mongo
-    # 5.  not in_service
+    # 3. battery is good enough Done
+    # 4. not in vacation mode - save to mongo Done
+    # 5.  not in_service Done
     #     return True
     #
     #
@@ -69,8 +115,8 @@ REMOVED
     @retry(logger=logger, delay=2, tries=2)
     def get_location(self):
         try:
-            # r_location = requests.get(self.url_tesla_location)
-            r_location = self.tesla_get_location()
+            r_location = requests.get(self.url_tesla_location)
+           # r_location = self.tesla_get_location()
         except Exception as e:
             logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
             sms.send_push_notification('Connection issue with' + self.url_tesla_location + ":" + str(e))
@@ -90,6 +136,28 @@ REMOVED
             sms.send_push_notification("Issue with  saving latlon to mongodb:" + str(e))
         return param_prox
 
+    # def tesla_get_location(self):
+    #     try:
+    #         r_location = requests.get(self.url_tesla_location)
+    #     except Exception as e:
+    #         logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
+    #         sms.send_sms('Connection issue with' + self.url_tesla_location + ":" + str(e))
+    #         raise
+    #     try:
+    #         lat = float(r_location.json()['lat'])
+    #         lon = float(r_location.json()['lon'])
+    #         param_prox = {"lat": lat, "lon": lon}
+    #     except Exception as e:
+    #         logger.warning('get_location latlon= values are not valid:' + str(e))
+    #         sms.send_sms('get_location latlon= values are not valid:' + str(e))
+    #         raise
+    #     try:
+    #         self.db.save_location(r_location.json())
+    #     except Exception as e:
+    #         logger.error("Issue with saving latlon to mongodb:" + str(e))
+    #         sms.send_sms("Issue with  saving latlon to mongodb:" + str(e))
+    #     return param_prox
+
     @retry(logger=logging.Logger, delay=2, tries=3)
     def is_on_home_street(self):
         latlon = self.get_location()
@@ -105,27 +173,7 @@ REMOVED
         except Exception as e:
             logger.warning("is_on_home_street: output of geocode is not as expected:"+ str(e))
 
-    def tesla_get_location(self):
-        try:
-            r_location = requests.get(self.url_tesla_location)
-        except Exception as e:
-            logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
-            sms.send_sms('Connection issue with' + self.url_tesla_location + ":" + str(e))
-            raise
-        try:
-            lat = float(r_location.json()['lat'])
-            lon = float(r_location.json()['lon'])
-            param_prox = {"lat": lat, "lon": lon}
-        except Exception as e:
-            logger.warning('get_location latlon= values are not valid:' + str(e))
-            sms.send_sms('get_location latlon= values are not valid:' + str(e))
-            raise
-        try:
-            self.db.save_location(r_location.json())
-        except Exception as e:
-            logger.error("Issue with saving latlon to mongodb:" + str(e))
-            sms.send_sms("Issue with  saving latlon to mongodb:" + str(e))
-        return param_prox
+
 
 
 if __name__ == "__main__":

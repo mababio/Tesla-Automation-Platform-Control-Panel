@@ -4,7 +4,7 @@ from retry import retry
 import googlemaps
 import util.db_mongo as db_mongo
 from util.logs import logger
-import util.sms as sms
+import util.notification as chanify
 from enum import Enum
 from datetime import datetime
 from pytz import timezone
@@ -115,10 +115,9 @@ class Tesla:
     def get_location(self):
         try:
             r_location = requests.get(self.url_tesla_location).json()
-           # r_location = self.tesla_get_location()
         except Exception as e:
             logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
-            sms.send_push_notification('Connection issue with' + self.url_tesla_location + ":" + str(e))
+            chanify.send_push_notification('Connection issue with' + self.url_tesla_location + ":" + str(e))
             raise
         try:
             lat = float(r_location['lat'])
@@ -126,13 +125,13 @@ class Tesla:
             param_prox = {"lat": lat, "lon": lon}
         except Exception as e:
             logger.warning('get_location latlon= values are not valid:' + str(e))
-            sms.send_push_notification('get_location latlon= values are not valid:' + str(e))
+            chanify.send_push_notification('get_location latlon= values are not valid:' + str(e))
             raise
         try:
             self.db.save_location(r_location)
         except Exception as e:
             logger.error("Issue with saving latlon to mongodb:" + str(e))
-            sms.send_push_notification("Issue with  saving latlon to mongodb:" + str(e))
+            chanify.send_push_notification("Issue with  saving latlon to mongodb:" + str(e))
         return param_prox
 
     # def tesla_get_location(self):
@@ -140,7 +139,7 @@ class Tesla:
     #         r_location = requests.get(self.url_tesla_location)
     #     except Exception as e:
     #         logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
-    #         sms.send_sms('Connection issue with' + self.url_tesla_location + ":" + str(e))
+    #         chanify.send_chanify('Connection issue with' + self.url_tesla_location + ":" + str(e))
     #         raise
     #     try:
     #         lat = float(r_location.json()['lat'])
@@ -148,13 +147,13 @@ class Tesla:
     #         param_prox = {"lat": lat, "lon": lon}
     #     except Exception as e:
     #         logger.warning('get_location latlon= values are not valid:' + str(e))
-    #         sms.send_sms('get_location latlon= values are not valid:' + str(e))
+    #         chanify.send_chanify('get_location latlon= values are not valid:' + str(e))
     #         raise
     #     try:
     #         self.db.save_location(r_location.json())
     #     except Exception as e:
     #         logger.error("Issue with saving latlon to mongodb:" + str(e))
-    #         sms.send_sms("Issue with  saving latlon to mongodb:" + str(e))
+    #         chanify.send_chanify("Issue with  saving latlon to mongodb:" + str(e))
     #     return param_prox
 
     @retry(logger=logging.Logger, delay=2, tries=3)

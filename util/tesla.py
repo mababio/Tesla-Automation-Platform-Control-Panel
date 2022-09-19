@@ -57,12 +57,12 @@ REMOVED
     def is_parked(self,length=5):
         shift_state = requests.get(self.url_tesla_info).json()['drive_state']['shift_state']
         db_latlon_age_mins = self.__get_db_latlon_age()
-        return True if shift_state == 'null' and db_latlon_age_mins > (length * 60) else False
+        return True if shift_state is None and db_latlon_age_mins > length else False
 
 
     def __get_db_latlon_age(self):
         est = timezone('US/Eastern')
-        db_latlon_timestamp_est = self.tesla_database['tesla_location'].find_one({'_id':'current'})['timestamp'].split('.')[0]
+        db_latlon_timestamp_est = self.db.tesla_database['tesla_location'].find_one({'_id':'current'})['timestamp'].split('.')[0]
         db_latlon_timestamp_est_str = str(db_latlon_timestamp_est)
         db_latlon_timestamp_datetime_obj= datetime.strptime(db_latlon_timestamp_est_str, "%Y-%m-%d %H:%M:%S")
 
@@ -174,8 +174,6 @@ REMOVED
             logger.warning("is_on_home_street: output of geocode is not as expected:"+ str(e))
 
 
-
-
 if __name__ == "__main__":
     obj = Tesla()
-    obj.is_battery_good()
+    print(obj.is_parked(60))

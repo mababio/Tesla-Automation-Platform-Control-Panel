@@ -53,6 +53,7 @@ class DBClient:
             logger.error("save_location::::: Type dict was not provided")
             raise TypeError("save_location::::: Type dict was not provided")
         future = self.publisher.publish(self.tesla_gps_save_mongodb_topic, data_str.encode("utf-8"))
+        logger.info('save_location::::: sent latlon to pubsub')
         return future
 
 

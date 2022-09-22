@@ -91,8 +91,8 @@ class TAP:
             else:
                 self.trigger_tesla_home_automation()
         except Exception as e:
-            notification.send_push_notification('tesla_home_automation_engine: Issue found in the while loop')
-            logger.error('tesla_home_automation_engine: Issue found in the while loop')
+            notification.send_push_notification('tesla_home_automation_engine: Issue found in the while loop ' + str(e))
+            logger.error('tesla_home_automation_engine: Issue found in the while loop ' + str(e))
             raise
 
 

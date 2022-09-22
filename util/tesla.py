@@ -44,6 +44,7 @@ REMOVED
             return True if battery_range > 100 else False
         except Exception as e:
             logger.warning('Issue calling ' + str(self.url_tesla_info) + ': ' + str(e))
+            raise
 
     @retry(logger=logger, delay=10, tries=3)
     def is_in_service(self):
@@ -51,7 +52,6 @@ REMOVED
             return requests.get(self.url_tesla_info).json()['in_service']
         except Exception as e:
             logger.warning('Issue calling ' + str(self.url_tesla_info) + ': ' + str(e))
-
 
     @retry(logger=logger, delay=10, tries=3)
     def is_parked(self,length=5):
@@ -71,6 +71,13 @@ REMOVED
 
         timelapse = accepted_current_timestamp_est_datetime_obj - db_latlon_timestamp_datetime_obj
         return int(timelapse.total_seconds()/60) # this is in mins
+
+    def is_tesla_parked_long(self):
+        if not self.is_in_service() and self.is_battery_good() and self.is_parked(): #and not self.is_on_home_street():
+            chanify.send_push_notification('Yes works')
+            return True
+        else:
+            return False
 
 
 
@@ -155,6 +162,7 @@ REMOVED
     #         logger.error("Issue with saving latlon to mongodb:" + str(e))
     #         chanify.send_chanify("Issue with  saving latlon to mongodb:" + str(e))
     #     return param_prox
+    #place limit on how long the air has been on
 
     @retry(logger=logging.Logger, delay=2, tries=3)
     def is_on_home_street(self):
@@ -174,4 +182,6 @@ REMOVED
 
 if __name__ == "__main__":
     obj = Tesla()
+    # print(obj.is_in_service())
+    # print(obj.is_battery_good()) and self.is_parked
     print(obj.get_location())

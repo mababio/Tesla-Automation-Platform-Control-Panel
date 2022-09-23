@@ -85,6 +85,9 @@ class TAP:
                 elif self.tesla_obj.proximity_value < 7:
                     notification.send_push_notification("Delay for 5 mins")
                     time.sleep(300)
+                elif self.tesla_obj.proximity_value < 10:
+                    notification.send_push_notification("Delay for 10 mins")
+                    time.sleep(600)
                 else:
                     notification.send_push_notification("Delay for 15 mins")
                     time.sleep(900)

@@ -184,4 +184,6 @@ if __name__ == "__main__":
     obj = Tesla()
     # print(obj.is_in_service())
     # print(obj.is_battery_good()) and self.is_parked
-    print(obj.get_location())
+    param_prox= {'lat':40.728482,'lon':-74.031597}
+    prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
+    print(prox)

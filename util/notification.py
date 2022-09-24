@@ -23,7 +23,7 @@ def send_sms(message):
 
 @retry(logger=logger, delay=2, tries=2)
 def send_push_notification(message):
-    token = 'CICw-ZwGEiJBQkxTUFZZRDU3MldEMk82V1gzWFlSUjJVQ0pBQVE0QkY0IgIIAQ.96qQDeja6tRGvcqKZ6d9YPGuzNWEwE74an_haxw1oMQ'
+    token = 'CIC8jp0GEiJBRERKNklQMlJNSEpaSkhSSEdOR1pIUEE0NUlQQUFNNENVIgIIAQ.WZeft-Bg2oKWAC7_3DSzh1vnwnLPH-kPUlqm0cM2WWg'
     message_json = {'text': message}
     data = parse.urlencode(message_json).encode()
     req = request.Request("https://api.chanify.net/v1/sender/" + token, data=data)
@@ -31,4 +31,4 @@ def send_push_notification(message):
 
 
 if __name__ == "__main__":
-    send_sms( 'testing')
+    send_push_notification( 'testing')

@@ -1,0 +1,31 @@
+
+[default]
+foo = 'mike'
+
+[production]
+default_temp = "22.7778"
+garage_open_limit = 20
+confirmation_limit =20
+mongo_client_url = "mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority"
+
+[production.pub_sub.gps]
+topic = 'tesla-gps-save-mongodb'
+project = 'ensure-dev-zone'
+
+
+[production.URL]
+tesla_prox="https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox"
+tesla_location="https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-get_location"
+tesla_set_temp="https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-set-temp"
+tesla_info="https://us-east4-ensure-dev-zone.cloudfunctions.net/tesla-info"
+myq_garage="https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
+
+[production.key]
+gmaps='AIzaSyCpSgkND8wBAdlK8sSaqjgqFMPx7AJmq68'
+chanify = 'CIC8jp0GEiJBRERKNklQMlJNSEpaSkhSSEdOR1pIUEE0NUlQQUFNNENVIgIIAQ.WZeft-Bg2oKWAC7_3DSzh1vnwnLPH-kPUlqm0cM2WWg'
+
+
+[development]
+[development.URL]
+
+

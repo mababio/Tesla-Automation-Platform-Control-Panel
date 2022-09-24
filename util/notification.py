@@ -2,6 +2,7 @@ from retry import retry
 from twilio.rest import Client
 from util.logs import logger
 from urllib import request, parse
+from config import settings
 
 
 @retry(logger=logger, delay=2, tries=2)
@@ -23,7 +24,7 @@ def send_sms(message):
 
 @retry(logger=logger, delay=2, tries=2)
 def send_push_notification(message):
-    token = 'CIC8jp0GEiJBRERKNklQMlJNSEpaSkhSSEdOR1pIUEE0NUlQQUFNNENVIgIIAQ.WZeft-Bg2oKWAC7_3DSzh1vnwnLPH-kPUlqm0cM2WWg'
+    token = settings['production']['key']['chanify']
     message_json = {'text': message}
     data = parse.urlencode(message_json).encode()
     req = request.Request("https://api.chanify.net/v1/sender/" + token, data=data)

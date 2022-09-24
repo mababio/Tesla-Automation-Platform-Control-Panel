@@ -2,8 +2,8 @@ FROM python:3.10-slim
 # Copy local code to the container image.
 ENV APP_HOME /app
 WORKDIR $APP_HOME
-COPY util  util/
-COPY custom custom/
+COPY config.py ./
+COPY settings.toml ./
 COPY main.py ./
 COPY requirement.txt ./
 RUN pip install --no-cache-dir -r  requirement.txt

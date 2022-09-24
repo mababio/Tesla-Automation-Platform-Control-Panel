@@ -7,22 +7,23 @@ import util.db_mongo as db_mongo
 import util.notification as notification
 import util.tesla as tesla
 from util.logs import logger
+from config import settings
 
 
 class TAP:
 
     def __init__(self):
         self.garage_still_open = None
-        self.stil_on_home_street = None
-        self.garage_open_limit = 20  # 5mins
-        self.confirmation_limit = 20
+        self.still_on_home_street = None
+        self.garage_open_limit = settings['production']['garage_open_limit']
+        self.confirmation_limit = settings['production']['confirmation_limit']
         self.db = db_mongo.DBClient()
         self.tesla_obj = tesla.Tesla()
+        self.url_myq_garage = settings['production']['URL']['myq_garage']
 
     def garage_isopen(self):
-        url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
         param = {"isopen": ''}
-        if requests.post(url_myq_garage, json=param).json()['isopen'] == 'closed':
+        if requests.post(self.url_myq_garage, json=param).json()['isopen'] == 'closed':
             return False
         else:
             return True
@@ -51,13 +52,12 @@ class TAP:
                         notification.send_push_notification('Not sure about this case, but returning true')
                         return True
                     else:
-                        self.stil_on_home_street = True
+                        self.still_on_home_street = True
                         return False
 
     def garage(self, state):
-        url_myq_garage = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-trigger-myq"
         param = {"state": state}
-        return requests.post(url_myq_garage, json=param).json()
+        return requests.post(settings['production']['URL']['myq_garage'], json=param).json()
 
     def trigger_tesla_home_automation(self):
         self.garage('open')

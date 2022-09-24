@@ -8,6 +8,8 @@ import util.notification as chanify
 from enum import Enum
 from datetime import datetime
 from pytz import timezone
+from config import settings
+#from dynaconf import settings
 
 
 class TeslaMode(Enum):
@@ -20,16 +22,16 @@ class TeslaMode(Enum):
 class Tesla:
 
     def __init__(self):
-REMOVED
-        self.url_tesla_prox = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox"
-        self.url_tesla_location = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-get_location"
+        self.gmaps = googlemaps.Client(key=settings['production']['key']['gmaps'])
+        self.url_tesla_prox = settings['production']['URL']['tesla_prox']
+        self.url_tesla_location = settings['production']['URL']['tesla_location']
         self.proximity_value = None
-        self.url_tesla_set_temp = "https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-set-temp"
-        self.url_tesla_info = "https://us-east4-ensure-dev-zone.cloudfunctions.net/tesla-info"
+        self.url_tesla_set_temp = settings['production']['URL']['tesla_set_temp']
+        self.url_tesla_info = settings['production']['URL']['tesla_info']
         self.db = db_mongo.DBClient()
 
     @retry(logger=logger, delay=10, tries=3)
-    def set_temp(self, temp='22.7778'):
+    def set_temp(self, temp=settings['production']['default_temp']):
         try:
             param = {"temp": temp}
             return requests.post(self.url_tesla_set_temp, json=param)
@@ -54,7 +56,7 @@ REMOVED
             logger.warning('Issue calling ' + str(self.url_tesla_info) + ': ' + str(e))
 
     @retry(logger=logger, delay=10, tries=3)
-    def is_parked(self,length=5):
+    def is_parked(self, length=5):
         shift_state = requests.get(self.url_tesla_info).json()['drive_state']['shift_state']
         db_latlon_age_mins = self.__get_db_latlon_age()
         return True if shift_state is None and db_latlon_age_mins > length else False
@@ -70,10 +72,10 @@ REMOVED
         accepted_current_timestamp_est_datetime_obj = datetime.strptime(current_timestamp_est_datetime_obj_formatted, "%Y-%m-%d %H:%M:%S")
 
         timelapse = accepted_current_timestamp_est_datetime_obj - db_latlon_timestamp_datetime_obj
-        return int(timelapse.total_seconds()/60) # this is in mins
+        return int(timelapse.total_seconds()/60)  # this is in mins
 
     def is_tesla_parked_long(self):
-        if not self.is_in_service() and self.is_battery_good() and self.is_parked(): #and not self.is_on_home_street():
+        if not self.is_in_service() and self.is_battery_good() and self.is_parked():# and not self.is_on_home_street():
             chanify.send_push_notification('Yes works')
             return True
         else:
@@ -177,13 +179,14 @@ REMOVED
                     return True
             return False
         except Exception as e:
-            logger.warning("is_on_home_street: output of geocode is not as expected:"+ str(e))
+            logger.warning("is_on_home_street: output of geocode is not as expected:" + str(e))
 
 
 if __name__ == "__main__":
-    obj = Tesla()
-    # print(obj.is_in_service())
-    # print(obj.is_battery_good()) and self.is_parked
-    param_prox= {'lat':40.728482,'lon':-74.031597}
-    prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
-    print(prox)
+    print(settings['production']['URL']['foo'])
+    # obj = Tesla()
+    # # print(obj.is_in_service())
+    # # print(obj.is_battery_good()) and self.is_parked
+    # param_prox= {'lat':40.728482,'lon':-74.031597}
+    # prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
+    # print(prox)

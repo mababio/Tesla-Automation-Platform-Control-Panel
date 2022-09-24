@@ -3,15 +3,17 @@ import pymongo
 from pymongo.server_api import ServerApi
 from util.logs import logger
 from google.cloud import pubsub_v1
+from config import settings
 
 
 class DBClient:
 
     def __init__(self):
         self.publisher = pubsub_v1.PublisherClient()
-        self.tesla_gps_save_mongodb_topic = self.publisher.topic_path('ensure-dev-zone', 'tesla-gps-save-mongodb')
+        self.tesla_gps_save_mongodb_topic = self.publisher.topic_path(settings['production']['pub_sub']['gps']['project']
+                                                                      , settings['production']['pub_sub']['gps']['topic'])
         try:
-REMOVED
+            client = pymongo.MongoClient( settings['production']['mongo_client_url'], server_api=ServerApi('1'))
             self.tesla_database = client['tesla']
         except Exception as e:
             logger.error("DBClient__init__::::: Issue with connecting to Mongodb: " + str(e))
@@ -55,8 +57,3 @@ REMOVED
         future = self.publisher.publish(self.tesla_gps_save_mongodb_topic, data_str.encode("utf-8"))
         logger.info('save_location::::: sent latlon to pubsub')
         return future
-
-
-
-
-

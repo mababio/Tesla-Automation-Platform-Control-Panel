@@ -30,7 +30,7 @@ class TAP:
 
     def confirmation_before_armed(self):
         while self.garage_isopen() and not self.garage_open_limit == 0:
-            notification.send_push_notification('Checking if still open for 5 mins' + str(self.garage_open_limit))
+            notification.send_push_notification('Checking if still open for ' + str(self.garage_open_limit) + 'seconds')
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
@@ -62,6 +62,7 @@ class TAP:
     def trigger_tesla_home_automation(self):
         self.garage('open')
         notification.send_push_notification('Garage door opening!')
+        logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
 
     def cleanup(self):
         notification.send_push_notification('Setinng job done')

@@ -54,6 +54,7 @@ class Tesla:
             return requests.get(self.url_tesla_info).json()['in_service']
         except Exception as e:
             logger.warning('Issue calling ' + str(self.url_tesla_info) + ': ' + str(e))
+            raise
 
     @retry(logger=logger, delay=10, tries=3)
     def is_parked(self, length=5):
@@ -96,11 +97,12 @@ class Tesla:
     # def is_dog_in_car(self):
     #     return True
     def is_tesla_moving(self):
-        speed = requests.post(self.url_tesla_location).json()['speed']
-        if speed == 'None':
-            return False
-        else:
-            return True
+        try:
+            return False if requests.post(self.url_tesla_location).json()['speed'] is None else True
+        except Exception as e:
+            logger.error('is_tesla_moving:::: Issue with tesla location Google function ' + str(e))
+            chanify.send_push_notification('is_tesla_moving:::: Issue with tesla location Google function ' + str(e))
+            raise
 
     @retry(logger=logger, delay=2, tries=2)
     def is_close(self):
@@ -141,38 +143,17 @@ class Tesla:
         except Exception as e:
             logger.error("Issue with saving latlon to mongodb:" + str(e))
             chanify.send_push_notification("Issue with  saving latlon to mongodb:" + str(e))
+            raise
         return param_prox
 
-    # def tesla_get_location(self):
-    #     try:
-    #         r_location = requests.get(self.url_tesla_location)
-    #     except Exception as e:
-    #         logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
-    #         chanify.send_chanify('Connection issue with' + self.url_tesla_location + ":" + str(e))
-    #         raise
-    #     try:
-    #         lat = float(r_location.json()['lat'])
-    #         lon = float(r_location.json()['lon'])
-    #         param_prox = {"lat": lat, "lon": lon}
-    #     except Exception as e:
-    #         logger.warning('get_location latlon= values are not valid:' + str(e))
-    #         chanify.send_chanify('get_location latlon= values are not valid:' + str(e))
-    #         raise
-    #     try:
-    #         self.db.save_location(r_location.json())
-    #     except Exception as e:
-    #         logger.error("Issue with saving latlon to mongodb:" + str(e))
-    #         chanify.send_chanify("Issue with  saving latlon to mongodb:" + str(e))
-    #     return param_prox
-    #place limit on how long the air has been on
-
-    @retry(logger=logging.Logger, delay=2, tries=3)
+    @retry(logger=logger, delay=2, tries=3)
     def is_on_home_street(self):
         latlon = self.get_location()
         try:
             reverse_geocode_result = self.gmaps.reverse_geocode((latlon['lat'], latlon['lon']))
         except Exception as e:
             logger.warning("is_on_home_street: Issue with Gmaps geocode:" + str(e))
+            raise
         try:
             for i in reverse_geocode_result:
                 if 'Arcuri Court' in i['address_components'][0]['long_name']:
@@ -180,12 +161,13 @@ class Tesla:
             return False
         except Exception as e:
             logger.warning("is_on_home_street: output of geocode is not as expected:" + str(e))
+            raise
 
 
 if __name__ == "__main__":
-    print(settings['production']['URL']['foo'])
-    # obj = Tesla()
-    # # print(obj.is_in_service())
+   # print(settings['production']['URL']['foo'])
+    obj = Tesla()
+    print(obj.is_tesla_moving())
     # # print(obj.is_battery_good()) and self.is_parked
     # param_prox= {'lat':40.728482,'lon':-74.031597}
     # prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()

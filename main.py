@@ -17,6 +17,7 @@ def before_request():
         g.db = DBClient()
     except Exception as e:
         notification.send_push_notification('Faced DB connectivity issue' + str(e))
+        logger.error('before_request::::: Faced DB connectivity issue' + str(e))
         raise
 
 
@@ -66,7 +67,7 @@ def tesla_automation():
                                             'leave open or are you'
                                             ' loading the bikes??')
         notification.send_push_notification('automation Done')
-    elif tesla_tap.stil_on_home_street:
+    elif tesla_tap.still_on_home_street:
         notification.send_push_notification('limit of 5 mins has been meet or still on Arcui ct')
         notification.send_push_notification('automation Done')
     tesla_tap.cleanup()

@@ -1,8 +1,6 @@
 import requests
 import time
-
 from retry import retry
-
 import util.db_mongo as db_mongo
 import util.notification as notification
 import util.tesla as tesla
@@ -74,12 +72,12 @@ class TAP:
             while not self.tesla_obj.is_close():
                 if self.tesla_obj.proximity_value < .07:
                     continue
-                elif self.tesla_obj.proximity_value < 1:
+                elif self.tesla_obj.proximity_value < .3:
                     notification.send_push_notification("Delay for 1 secs")
                     time.sleep(1)
-                elif self.tesla_obj.proximity_value < 2:
+                elif self.tesla_obj.proximity_value < 1:
                     notification.send_push_notification("Delay for 15 sec")
-                    time.sleep(15)
+                    time.sleep(10)
                 elif self.tesla_obj.proximity_value < 3:
                     notification.send_push_notification("Delay for 2 mins")
                     time.sleep(120)
@@ -102,7 +100,14 @@ class TAP:
 
 if __name__ == "__main__":
     obj = TAP()
-    print(obj.tesla_obj.is_close())
+    print(obj.confirmation_before_armed())
+    # print(obj.tesla_obj.is_close())
+
+    # obj.tesla_obj.get_location()
+    # while True:
+    #     obj.tesla_obj.get_location()
+    #     time.sleep(2)
+
     #print(obj.tesla_obj.proximity_value)
     #notification.send_push_notification("Delay for 1 secsss")
     #time.sleep(1)

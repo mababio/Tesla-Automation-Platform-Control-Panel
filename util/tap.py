@@ -45,6 +45,8 @@ class TAP:
 
     def cleanup(self):
         notification.send_push_notification('Setinng job done')
+        self.db.set_ifttt_trigger_lock('False')
+
        # self.db.set_door_close_status("came_home")
 
     @retry(logger=logger, delay=300, tries=3)

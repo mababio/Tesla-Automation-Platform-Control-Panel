@@ -9,7 +9,6 @@ from enum import Enum
 from datetime import datetime
 from pytz import timezone
 from config import settings
-#from dynaconf import settings
 
 
 class TeslaMode(Enum):
@@ -26,76 +25,8 @@ class Tesla:
         self.url_tesla_prox = settings['production']['URL']['tesla_prox']
         self.url_tesla_location = settings['production']['URL']['tesla_location']
         self.proximity_value = None
-        self.url_tesla_set_temp = settings['production']['URL']['tesla_set_temp']
-        self.url_tesla_info = settings['production']['URL']['tesla_info']
         self.db = db_mongo.DBClient()
 
-    @retry(logger=logger, delay=10, tries=3)
-    def set_temp(self, temp=settings['production']['default_temp']):
-        try:
-            param = {"temp": temp}
-            return requests.post(self.url_tesla_set_temp, json=param)
-        except Exception as e:
-            logger.warning('Issue calling ' + str(self.url_tesla_set_temp) + ': ' + str(e))
-            raise
-
-    @retry(logger=logger, delay=10, tries=3)
-    def is_battery_good(self):
-        try:
-            battery_range = requests.get(self.url_tesla_info).json()['charge_state']['battery_range']
-            return True if battery_range > 100 else False
-        except Exception as e:
-            logger.warning('Issue calling ' + str(self.url_tesla_info) + ': ' + str(e))
-            raise
-
-    @retry(logger=logger, delay=10, tries=3)
-    def is_in_service(self):
-        try:
-            return requests.get(self.url_tesla_info).json()['in_service']
-        except Exception as e:
-            logger.warning('Issue calling ' + str(self.url_tesla_info) + ': ' + str(e))
-            raise
-
-    @retry(logger=logger, delay=10, tries=3)
-    def is_parked(self, length=5):
-        shift_state = requests.get(self.url_tesla_info).json()['drive_state']['shift_state']
-        db_latlon_age_mins = self.__get_db_latlon_age()
-        return True if shift_state is None and db_latlon_age_mins > length else False
-
-    def __get_db_latlon_age(self):
-        est = timezone('US/Eastern')
-        db_latlon_timestamp_est = self.db.tesla_database['tesla_location'].find_one({'_id':'current'})['timestamp'].split('.')[0]
-        db_latlon_timestamp_est_str = str(db_latlon_timestamp_est)
-        db_latlon_timestamp_datetime_obj = datetime.strptime(db_latlon_timestamp_est_str, "%Y-%m-%d %H:%M:%S")
-
-        current_timestamp_est_datetime_obj = datetime.now(est)
-        current_timestamp_est_datetime_obj_formatted = str(current_timestamp_est_datetime_obj).split('.')[0]
-        accepted_current_timestamp_est_datetime_obj = datetime.strptime(current_timestamp_est_datetime_obj_formatted, "%Y-%m-%d %H:%M:%S")
-
-        timelapse = accepted_current_timestamp_est_datetime_obj - db_latlon_timestamp_datetime_obj
-        return int(timelapse.total_seconds()/60)  # this is in mins
-
-    def is_tesla_parked_long(self):
-        if not self.is_in_service() and self.is_battery_good() and self.is_parked():# and not self.is_on_home_street():
-            chanify.send_push_notification('Yes works')
-            return True
-        else:
-            return False
-
-
-
-    # def is_tesla_ready_for_climate_on(self):
-    # 1. car is not moving, and parked for a while
- #       - store gps location and add time_share timestamp if hasn't chnage then
-    # 2. car is not home
-    # 3. battery is good enough Done
-    # 4. not in vacation mode - save to mongo Done
-    # 5.  not in_service Done
-    #     return True
-    #
-    #
-    # def is_dog_in_car(self):
-    #     return True
     def is_tesla_moving(self):
         try:
             return False if requests.post(self.url_tesla_location).json()['speed'] is None else True

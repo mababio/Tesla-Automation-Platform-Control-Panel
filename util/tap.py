@@ -28,7 +28,8 @@ class TAP:
             self.garage_open_limit -= 5
         else:
             while self.tesla_obj.is_on_home_street() and not self.confirmation_limit == 0:
-                notification.send_push_notification('Either the Garage or door aren\'t in the right state')
+                notification.send_push_notification('Waiting ' + str(self.confirmation_limit) +
+                                                    'seconds for conditions to be met for trigger')
                 time.sleep(5)
                 self.confirmation_limit -= 5
             else:

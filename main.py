@@ -42,8 +42,8 @@ def kick_off_job_ifttt_close_bg():
         notification.send_push_notification('Car has arrive and door was closed')
         return 'Car has arrive and door was closed'
     else:
-        notification.send_push_notification('Door was not closed b/c car came home')
-        return 'Door was not closed b/c car came home'
+        notification.send_push_notification('Garage Door closed')
+        return 'Garage Door closed'
 
 
 def garage_door_closed():

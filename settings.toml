@@ -4,8 +4,8 @@ foo = 'mike'
 
 [production]
 default_temp = "22.7778"
-garage_open_limit = 20
-confirmation_limit = 20
+garage_open_limit = 200
+confirmation_limit = 200
 mongo_client_url = "mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority"
 
 [production.pub_sub.gps]

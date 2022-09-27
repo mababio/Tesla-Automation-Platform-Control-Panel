@@ -2,7 +2,7 @@ from enum import Enum
 import requests
 from config import settings
 from util.logs import logger
-import util.db_mongo as db_mongo
+# import util.db_mongo as db_mongo
 
 
 class GarageCloseReason(Enum):
@@ -16,9 +16,11 @@ def garage_is_open():
                     == 'closed' else True
 
 
-def open_garage():
+def open_garage(db):
     try:
-        return requests.post(settings['production']['URL']['myq_garage'], json={"state": 'open'}).json()
+        return_val = requests.post(settings['production']['URL']['myq_garage'], json={"state": 'open'}).json()
+        set_close_reason(GarageCloseReason.DRIVE_HOME, db)
+        return return_val
     except Exception as e:
         logger.error('open_garage::::: Issue with opening the garage::::: ' + str(e))
 

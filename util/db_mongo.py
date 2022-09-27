@@ -25,16 +25,16 @@ class DBClient:
         except Exception as e:
             logger.error("get_tesla_database::::: Error getting mongodb client conn to DB " + str(e))
 
-    def set_ifttt_trigger_lock(self,bolval):
+    def set_ifttt_trigger_lock(self, bol_val):
         myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
-        newvalues = {"$set": {"lock": bolval}}
-        self.tesla_database['tesla_trigger'].update_one(myquery, newvalues)
-        logger.debug('set_ifttt_trigger_lock::::: Updating ifttt_trigger_lock value to' + str(bolval))
+        new_values = {"$set": {"lock": bol_val}}
+        self.tesla_database['tesla_trigger'].update_one(myquery, new_values)
+        logger.debug('set_ifttt_trigger_lock::::: Updating ifttt_trigger_lock value to' + str(bol_val))
 
     def set_door_close_status(self, reason):
         myquery = {"_id": "garage"}
-        newvalues = {"$set": {"closed_reason": reason}}
-        self.tesla_database['garage'].update_one(myquery, newvalues)
+        new_values = {"$set": {"closed_reason": reason}}
+        self.tesla_database['garage'].update_one(myquery, new_values)
         logger.debug('set_door_close_status::::: Updating door_close_status value to' + str(reason))
 
     def get_ifttt_trigger_lock(self):

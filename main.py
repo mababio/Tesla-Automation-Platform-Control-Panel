@@ -23,11 +23,9 @@ def before_request():
 
 @app.route("/open")
 def kick_off_job_ifttt_open_bg():
-    logger.debug('kick_off_job_ifttt_open_bg: start of the /open flask route')
+    logger.info('kick_off_job_ifttt_open_bg: start of the /open flask route')
     if g.db.get_tesla_database()['tesla_trigger'].find_one()['lock'] == 'False':
-        myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
-        newvalues = {"$set": {"lock": "True"}}
-        g.db.get_tesla_database()['tesla_trigger'].update_one(myquery, newvalues)
+        g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "True"}})
         executor.submit(tesla_automation)
         return 'Scheduled a job'
     else:
@@ -59,7 +57,8 @@ def garage_door_closed():
 def tesla_automation():
     tesla_tap = tap.TAP()
     if tesla_tap.confirmation_before_armed():
-        notification.send_push_notification('trigger tesla home automation!')
+        notification.send_push_notification('Trigger tesla home automation!')
+        logger.info('Trigger tesla home automation!')
         tesla_tap.tesla_home_automation_engine()
         notification.send_push_notification('automation Done')
     elif tesla_tap.garage_still_open:

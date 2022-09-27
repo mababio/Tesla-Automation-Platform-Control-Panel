@@ -8,6 +8,8 @@ from config import settings
 import util.garage as garage
 
 
+
+
 class TAP:
 
     def __init__(self):
@@ -20,41 +22,30 @@ class TAP:
 
     def confirmation_before_armed(self):
         while garage.garage_is_open() and not self.garage_open_limit == 0:
-            notification.send_push_notification('Checking if still open for ' + str(self.garage_open_limit) + 'seconds')
+            notification.send_push_notification('Garage is open ' + str(self.garage_open_limit) +
+                                                ' seconds remaining to confirm closure')
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
-            if not garage.garage_is_open() and self.tesla_obj.is_tesla_moving() and not self.tesla_obj.is_on_home_street():
-                notification.send_push_notification('garage is closed and car is moving and not on home street')
-                garage.set_close_reason(garage.GarageCloseReason.DRIVE_AWAY, self.db)
-                return True
-            elif garage.garage_is_open() and self.garage_open_limit == 0:
-                notification.send_push_notification('garage has been open for more than 5 mins and we are terminating '
-                                                    'confirmation function')
-                self.garage_still_open = True
-                return False
+            while self.tesla_obj.is_on_home_street() and not self.confirmation_limit == 0:
+                notification.send_push_notification('Either the Garage or door aren\'t in the right state')
+                time.sleep(5)
+                self.confirmation_limit -= 5
             else:
-                while self.tesla_obj.is_on_home_street() and not self.confirmation_limit == 0:
-                    notification.send_push_notification('car is parked on street with garage closed')
-                    time.sleep(5)
-                    self.confirmation_limit -= 5
+                if not garage.garage_is_open() and not self.tesla_obj.is_on_home_street:
+                    garage.set_close_reason(garage.GarageCloseReason.DRIVE_AWAY, self.db)
+                    return True
                 else:
-                    if not self.tesla_obj.is_on_home_street():  # not on home street
-                        notification.send_push_notification('Not sure about this case, but returning true')
-                        garage.set_close_reason(garage.GarageCloseReason.DRIVE_AWAY, self.db)
-                        return True
-                    else:
-                        self.still_on_home_street = True
-                        return False
+                    return False
 
     def trigger_tesla_home_automation(self):
-        garage.open_garage()
+        garage.open_garage(self.db)
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
 
     def cleanup(self):
         notification.send_push_notification('Setinng job done')
-        self.db.set_door_close_status("came_home")
+       # self.db.set_door_close_status("came_home")
 
     @retry(logger=logger, delay=300, tries=3)
     def tesla_home_automation_engine(self):

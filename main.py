@@ -6,6 +6,8 @@ from util.db_mongo import DBClient
 from util import tap
 from util import notification
 from util.logs import logger
+import util.garage as garage
+from util.tesla import Tesla
 
 app = Flask(__name__)
 executor = Executor(app)
@@ -35,7 +37,7 @@ def kick_off_job_ifttt_open_bg():
 
 @app.route("/close")
 def kick_off_job_ifttt_close_bg():
-    if g.db.get_door_close_status() == 'came_home':
+    if g.db.get_door_close_status() == 'DRIVE_HOME':
         executor.submit(garage_door_closed)
         notification.send_push_notification('Car has arrive and door was closed')
         return 'Car has arrive and door was closed'
@@ -48,26 +50,27 @@ def garage_door_closed():
     myquery_ifttt_trigger_lock = {"_id": "IFTTT_TRIGGER_LOCK"}
     ct = {"$set": {"lock": "False"}}
     myquery_garage_closed_reason = {"_id": "garage"}
-    newvalues_ifttt_trigger_lock = {"$set": {"locked_reason": " "}}
+    new_values_ifttt_trigger_lock = {"$set": {"locked_reason": " "}}
 
     g.db.get_tesla_database()['tesla_trigger'].update_one(myquery_ifttt_trigger_lock, ct)
-    g.db.get_tesla_database()['garage'].update_one(myquery_garage_closed_reason, newvalues_ifttt_trigger_lock)
+    g.db.get_tesla_database()['garage'].update_one(myquery_garage_closed_reason, new_values_ifttt_trigger_lock)
 
 
 def tesla_automation():
     tesla_tap = tap.TAP()
+    professor = Tesla()
     if tesla_tap.confirmation_before_armed():
         notification.send_push_notification('Trigger tesla home automation!')
         logger.info('Trigger tesla home automation!')
         tesla_tap.tesla_home_automation_engine()
         notification.send_push_notification('automation Done')
-    elif tesla_tap.garage_still_open:
+    elif garage.garage_is_open():
         notification.send_push_notification(' Garage door has been open for 5 mins. would your like to close, '
                                             'leave open or are you'
                                             ' loading the bikes??')
         notification.send_push_notification('automation Done')
-    elif tesla_tap.still_on_home_street:
-        notification.send_push_notification('limit of 5 mins has been meet or still on Arcui ct')
+    elif professor.is_on_home_street:
+        notification.send_push_notification('Still on Arcui ct')
         notification.send_push_notification('automation Done')
     tesla_tap.cleanup()
 

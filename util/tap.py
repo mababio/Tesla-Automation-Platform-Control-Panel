@@ -32,7 +32,7 @@ class TAP:
                 time.sleep(5)
                 self.confirmation_limit -= 5
             else:
-                if not garage.garage_is_open() and not self.tesla_obj.is_on_home_street:
+                if not garage.garage_is_open() and not self.tesla_obj.is_on_home_street():
                     garage.set_close_reason(garage.GarageCloseReason.DRIVE_AWAY, self.db)
                     return True
                 else:

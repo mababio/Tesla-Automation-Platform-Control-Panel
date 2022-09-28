@@ -26,18 +26,19 @@ def before_request():
 @app.route("/open")
 def kick_off_job_ifttt_open_bg():
     logger.info('kick_off_job_ifttt_open_bg: start of the /open flask route')
-    if g.db.get_tesla_database()['tesla_trigger'].find_one()['lock'] == 'False':
+    if g.db.get_tesla_database()['tesla_trigger'].find_one()['lock'] != 'False' or \
+            g.db.get_tesla_database()['garage'].find_one()['opened_reason'] == 'DRIVE_AWAY':
+        notification.send_push_notification("Process is already running")
+        return 'Process is already running'
+    else:
         g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "True"}})
         executor.submit(tesla_automation)
         return 'Scheduled a job'
-    else:
-        notification.send_push_notification("Process is already running")
-        return 'Process is already running'
 
 
 @app.route("/close")
 def kick_off_job_ifttt_close_bg():
-    if g.db.get_door_close_status() == 'DRIVE_HOME':
+    if g.db.get_door_open_status() == 'DRIVE_HOME':
         executor.submit(garage_door_closed)
         notification.send_push_notification('Car has arrive and door was closed')
         return 'Car has arrive and door was closed'
@@ -50,7 +51,7 @@ def garage_door_closed():
     myquery_ifttt_trigger_lock = {"_id": "IFTTT_TRIGGER_LOCK"}
     ct = {"$set": {"lock": "False"}}
     myquery_garage_closed_reason = {"_id": "garage"}
-    new_values_ifttt_trigger_lock = {"$set": {"locked_reason": " "}}
+    new_values_ifttt_trigger_lock = {"$set": {"closed_reason": garage.GarageCloseReason.DRIVE_HOME.value}}
 
     g.db.get_tesla_database()['tesla_trigger'].update_one(myquery_ifttt_trigger_lock, ct)
     g.db.get_tesla_database()['garage'].update_one(myquery_garage_closed_reason, new_values_ifttt_trigger_lock)
@@ -60,6 +61,7 @@ def tesla_automation():
     tesla_tap = tap.TAP()
     professor = Tesla()
     if tesla_tap.confirmation_before_armed():
+        g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "garage"}, {"$set": {"opened_reason": "DRIVE_AWAY"}})
         notification.send_push_notification('Trigger tesla home automation!')
         logger.info('Trigger tesla home automation!')
         tesla_tap.tesla_home_automation_engine()

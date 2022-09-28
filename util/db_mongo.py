@@ -4,7 +4,6 @@ from pymongo.server_api import ServerApi
 from util.logs import logger
 from google.cloud import pubsub_v1
 from config import settings
-import util.garage as garage
 
 
 class DBClient:
@@ -14,7 +13,7 @@ class DBClient:
         self.tesla_gps_save_mongodb_topic = self.publisher.topic_path(settings['production']['pub_sub']['gps']['project']
                                                                       , settings['production']['pub_sub']['gps']['topic'])
         try:
-            client = pymongo.MongoClient( settings['production']['mongo_client_url'], server_api=ServerApi('1'))
+            client = pymongo.MongoClient(settings['production']['mongo_client_url'], server_api=ServerApi('1'))
             self.tesla_database = client['tesla']
         except Exception as e:
             logger.error("DBClient__init__::::: Issue with connecting to Mongodb: " + str(e))

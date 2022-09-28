@@ -1,4 +1,3 @@
-import logging
 import requests
 from retry import retry
 import googlemaps
@@ -6,8 +5,6 @@ import util.db_mongo as db_mongo
 from util.logs import logger
 import util.notification as chanify
 from enum import Enum
-from datetime import datetime
-from pytz import timezone
 from config import settings
 
 
@@ -98,8 +95,9 @@ class Tesla:
 if __name__ == "__main__":
    # print(settings['production']['URL']['foo'])
     obj = Tesla()
-    print(obj.is_tesla_moving())
+    # print(obj.get_location())
     # # print(obj.is_battery_good()) and self.is_parked
-    # param_prox= {'lat':40.728482,'lon':-74.031597}
+    # param_prox={'lat':40.669900, 'lon': -74.095629}
+    # param_prox={'lat':40.670291, 'lon': -74.096888}
     # prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
     # print(prox)

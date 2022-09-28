@@ -4,6 +4,7 @@ from pymongo.server_api import ServerApi
 from util.logs import logger
 from google.cloud import pubsub_v1
 from config import settings
+import util.garage as garage
 
 
 class DBClient:
@@ -37,6 +38,12 @@ class DBClient:
         self.tesla_database['garage'].update_one(myquery, new_values)
         logger.debug('set_door_close_status::::: Updating door_close_status value to' + str(reason))
 
+    def set_door_open_status(self, reason):
+        myquery = {"_id": "garage"}
+        new_values = {"$set": {"opened_reason": reason}}
+        self.tesla_database['garage'].update_one(myquery, new_values)
+        logger.debug('set_door_open_status::::: Updating door_open_status value to' + str(reason))
+
     def get_ifttt_trigger_lock(self):
         logger.debug('get_ifttt_trigger_lock::::: Getting ifttt_trigger_lock value')
         return self.tesla_database['tesla_trigger'].find_one()['lock']
@@ -44,6 +51,10 @@ class DBClient:
     def get_door_close_status(self):
         logger.debug('get_door_close_status::::: get_door_close_status: Getting door_close_status value')
         return self.tesla_database['garage'].find_one()['closed_reason']
+
+    def get_door_open_status(self):
+        logger.debug('get_door_open_status::::: get_door_open_status: Getting door_open_status value')
+        return self.tesla_database['garage'].find_one()['opened_reason']
 
     def __get_saved_location(self):
         return self.tesla_database['tesla_location'].find_one({'_id':'current'})
@@ -57,3 +68,8 @@ class DBClient:
         future = self.publisher.publish(self.tesla_gps_save_mongodb_topic, data_str.encode("utf-8"))
         logger.info('save_location::::: sent latlon to pubsub')
         return future
+
+
+if __name__ == "__main__":
+    obj = DBClient()
+    print(obj.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME.value))

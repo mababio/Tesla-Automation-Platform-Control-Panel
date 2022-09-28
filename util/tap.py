@@ -47,9 +47,6 @@ class TAP:
     def cleanup(self):
         notification.send_push_notification('Setinng job done')
 
-
-       # self.db.set_door_close_status("came_home")
-
     @retry(logger=logger, delay=300, tries=3)
     def tesla_home_automation_engine(self):
         try:
@@ -84,7 +81,7 @@ class TAP:
 
 if __name__ == "__main__":
     obj = TAP()
-    print(obj.garage_isopen())
+    print(obj.garage_is_open())
     # print(obj.tesla_obj.is_close())
 
     # obj.tesla_obj.get_location()

@@ -52,9 +52,12 @@ def garage_door_closed():
     ct = {"$set": {"lock": "False"}}
     myquery_garage_closed_reason = {"_id": "garage"}
     new_values_ifttt_trigger_lock = {"$set": {"closed_reason": garage.GarageCloseReason.DRIVE_HOME.value}}
+    myquery_climate = {"_id": "enum"}
+    new_values_climate = {"$set": {"climate_turned_on_before": "False"}}
 
     g.db.get_tesla_database()['tesla_trigger'].update_one(myquery_ifttt_trigger_lock, ct)
     g.db.get_tesla_database()['garage'].update_one(myquery_garage_closed_reason, new_values_ifttt_trigger_lock)
+    g.db.get_tesla_database()['tesla_climate_status'].update_one(myquery_climate, new_values_climate)
 
 
 def tesla_automation():

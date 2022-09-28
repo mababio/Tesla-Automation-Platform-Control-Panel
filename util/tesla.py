@@ -98,6 +98,6 @@ if __name__ == "__main__":
     # print(obj.get_location())
     # # print(obj.is_battery_good()) and self.is_parked
     # param_prox={'lat':40.669900, 'lon': -74.095629}
-    # param_prox={'lat':40.670291, 'lon': -74.096888}
-    # prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
-    # print(prox)
+    param_prox={'lat':40.670291, 'lon': -74.096888}
+    prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
+    print(prox)

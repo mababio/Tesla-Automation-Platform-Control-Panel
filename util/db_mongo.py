@@ -72,4 +72,4 @@ class DBClient:
 
 if __name__ == "__main__":
     obj = DBClient()
-    print(obj.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME.value))
+    print(obj.set_door_open_status("mababio"))

@@ -6,6 +6,7 @@ import util.tesla as tesla
 from util.logs import logger
 from config import settings
 import util.garage as garage
+from util import tesla_proximity_scheduler
 
 
 
@@ -43,9 +44,11 @@ class TAP:
         garage.open_garage(self.db)
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
+        tesla_proximity_scheduler.disable_job()
+        notification.send_push_notification('Automation Done')
 
     def cleanup(self):
-        notification.send_push_notification('Setinng job done')
+        notification.send_push_notification('Closing out Run')
 
     @retry(logger=logger, delay=300, tries=3)
     def tesla_home_automation_engine(self):
@@ -60,17 +63,26 @@ class TAP:
                     notification.send_push_notification("Delay for 15 sec")
                     time.sleep(10)
                 elif self.tesla_obj.proximity_value < 3:
-                    notification.send_push_notification("Delay for 2 mins")
+                    notification.send_push_notification("Delay for 2 minutes")
                     time.sleep(120)
                 elif self.tesla_obj.proximity_value < 7:
-                    notification.send_push_notification("Delay for 5 mins")
-                    time.sleep(300)
+                    notification.send_push_notification("Delay for 5 minutes")
+                    tesla_proximity_scheduler.schedule_proximity_job(5)
+                    self.db.get_tesla_database()['tesla_trigger']\
+                        .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
+                    break
                 elif self.tesla_obj.proximity_value < 10:
-                    notification.send_push_notification("Delay for 10 mins")
-                    time.sleep(600)
+                    notification.send_push_notification("Delay for 10 minutes")
+                    tesla_proximity_scheduler.schedule_proximity_job(10)
+                    self.db.get_tesla_database()['tesla_trigger'] \
+                        .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
+                    break
                 else:
-                    notification.send_push_notification("Delay for 15 mins")
-                    time.sleep(900)
+                    notification.send_push_notification("Delay for 15 minutes")
+                    tesla_proximity_scheduler.schedule_proximity_job(15)
+                    self.db.get_tesla_database()['tesla_trigger'] \
+                        .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
+                    break
             else:
                 self.trigger_tesla_home_automation()
         except Exception as e:
@@ -81,7 +93,7 @@ class TAP:
 
 if __name__ == "__main__":
     obj = TAP()
-    print(obj.garage_is_open())
+    print(garage.garage_is_open())
     # print(obj.tesla_obj.is_close())
 
     # obj.tesla_obj.get_location()

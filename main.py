@@ -60,15 +60,30 @@ def garage_door_closed():
     g.db.get_tesla_database()['tesla_climate_status'].update_one(myquery_climate, new_values_climate)
 
 
+@app.route("/long_term")
+def kick_off_job_long_term_bg():
+    logger.info('kick_off_job_long_term_bg::::: Kicking off :::::')
+    if g.db.get_tesla_database()['garage'].find_one()['opened_reason'] == 'DRIVE_AWAY':
+        g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "True"}})
+        tesla_tap = tap.TAP()
+        executor.submit(tesla_tap.tesla_home_automation_engine)
+        return 'Scheduled a job'
+    else:
+        logger.error('kick_off_job_long_term_bg::::: Appears car is home and this function should not run')
+        notification.send_push_notification\
+            ('kick_off_job_long_term_bg::::: Appears car is home and this function should not run')
+        return 'kick_off_job_long_term_bg::::: Appears car is home and this function should not run'
+
+
 def tesla_automation():
     tesla_tap = tap.TAP()
     professor = Tesla()
     if tesla_tap.confirmation_before_armed():
         g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "garage"}, {"$set": {"opened_reason": "DRIVE_AWAY"}})
-        notification.send_push_notification('Trigger tesla home automation!')
-        logger.info('Trigger tesla home automation!')
+        g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "garage"}, {"$set": {"closed_reason": "DRIVE_AWAY"}})
+        notification.send_push_notification('Trigger Tesla home automation!')
+        logger.info('Trigger Tesla home automation!')
         tesla_tap.tesla_home_automation_engine()
-        notification.send_push_notification('automation Done')
     elif garage.garage_is_open():
         notification.send_push_notification(' Garage door has been open for 5 mins. would your like to close, '
                                             'leave open or are you'

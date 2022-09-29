@@ -38,12 +38,6 @@ from google.protobuf import duration_pb2, field_mask_pb2
 
 client = scheduler_v1.CloudSchedulerClient()
 
-retry_config = scheduler_v1.RetryConfig()
-retry_config.retry_count = 4
-retry_config.max_doublings = 4
-retry_config.min_backoff_duration = duration_pb2.Duration(seconds=5)
-retry_config.max_backoff_duration = duration_pb2.Duration(seconds=60)
-
 job = scheduler_v1.Job()
 job.name = 'projects/ensure-dev-zone/locations/us-east4/jobs/32661473461610032511'  #f"projects/{PROJECT_ID}/locations/{DATAFLOW_REGION}/jobs/test"
 job.schedule = '* * * * 1'
@@ -56,5 +50,4 @@ request = scheduler_v1.UpdateJobRequest(
 )
 
 response = client.update_job(request=request)
-
-print(response)
+print(response.state)

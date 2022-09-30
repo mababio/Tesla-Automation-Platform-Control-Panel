@@ -36,6 +36,7 @@ class TAP:
             else:
                 if not garage.garage_is_open() and not self.tesla_obj.is_on_home_street():
                     garage.set_close_reason(garage.GarageCloseReason.DRIVE_AWAY, self.db)
+                    garage.set_open_reason(garage.GarageOpenReason.DRIVE_AWAY, self.db)
                     return True
                 else:
                     return False
@@ -44,7 +45,12 @@ class TAP:
         garage.open_garage(self.db)
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
-        tesla_proximity_scheduler.disable_job()
+        job = tesla_proximity_scheduler.disable_job()
+        if job.state is job.State.DISABLED:
+            notification.send_push_notification('job has been disabled!')
+        else:
+            logger.error("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
+            notification.send_push_notification("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
         notification.send_push_notification('Automation Done')
 
     def cleanup(self):

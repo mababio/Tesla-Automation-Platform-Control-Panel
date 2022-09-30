@@ -25,7 +25,7 @@ def schedule_proximity_job(delay_mins):
 
 def disable_job():
     request = scheduler_v1.PauseJobRequest(name= settings['production']['scheduler_job'],)
-    client.pause_job(request=request)
+    return client.pause_job(request=request)
 
 
 def enable_job():

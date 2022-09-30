@@ -28,6 +28,8 @@ chanify = 'CIC8jp0GEiJBRERKNklQMlJNSEpaSkhSSEdOR1pIUEE0NUlQQUFNNENVIgIIAQ.WZeft-
 
 [development]
 scheduler_job = 'projects/ensure-dev-zone/locations/us-east4/jobs/32661473461610032511'
+
 [development.URL]
+myq_garage = 'https://us-central1-ensure-dev-zone.cloudfunctions.net/function-2'
 
 

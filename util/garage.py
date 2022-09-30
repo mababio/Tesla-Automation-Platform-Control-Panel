@@ -40,9 +40,9 @@ def set_close_reason(garage_close_reason, db):
 
 def open_garage(db):
     try:
-        return_val = requests.post(settings['production']['URL']['myq_garage'], json={"state": 'open'}).json()
+        return_val = requests.get(settings['development']['URL']['myq_garage'])
         set_open_reason(GarageOpenReason.DRIVE_HOME, db)
-        return return_val
+        return True if return_val else False
     except Exception as e:
         logger.error('open_garage::::: Issue with opening the garage::::: ' + str(e))
 
@@ -58,4 +58,6 @@ def close_garage():
 
 # db1 = db_mongo.DBClient()
 # set_close_reason(GarageCloseReason.DRIVE_AWAY, db1)
+
+requests.post(settings['production']['URL']['myq_garage'], json={"state": 'close'}).json()
 

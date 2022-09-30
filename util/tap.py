@@ -70,7 +70,10 @@ class TAP:
                     time.sleep(10)
                 elif self.tesla_obj.proximity_value < 3:
                     notification.send_push_notification("Delay for 2 minutes")
-                    time.sleep(120)
+                    tesla_proximity_scheduler.schedule_proximity_job(2)
+                    self.db.get_tesla_database()['tesla_trigger'] \
+                        .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
+                    break
                 elif self.tesla_obj.proximity_value < 7:
                     notification.send_push_notification("Delay for 5 minutes")
                     tesla_proximity_scheduler.schedule_proximity_job(5)

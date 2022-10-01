@@ -1,5 +1,5 @@
 from google.cloud import scheduler_v1
-from google.protobuf import duration_pb2, field_mask_pb2
+from google.protobuf import field_mask_pb2
 from config import settings
 
 client = scheduler_v1.CloudSchedulerClient()
@@ -29,7 +29,7 @@ def disable_job():
 
 
 def enable_job():
-    request = scheduler_v1.ResumeJobRequest(name= settings['production']['scheduler_job'],)
+    request = scheduler_v1.ResumeJobRequest(name=settings['production']['scheduler_job'],)
     client.resume_job(request=request)
 
 

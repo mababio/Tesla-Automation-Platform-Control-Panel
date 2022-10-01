@@ -59,5 +59,5 @@ def close_garage():
 # db1 = db_mongo.DBClient()
 # set_close_reason(GarageCloseReason.DRIVE_AWAY, db1)
 
-requests.post(settings['production']['URL']['myq_garage'], json={"state": 'close'}).json()
+#requests.post(settings['production']['URL']['myq_garage'], json={"state": 'close'}).json()
 

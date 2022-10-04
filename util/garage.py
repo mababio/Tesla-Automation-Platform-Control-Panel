@@ -41,7 +41,6 @@ def set_close_reason(garage_close_reason, db):
 
 def open_garage(db):
     send_push_notification('Would of opened the garage')
-    set_open_reason(GarageOpenReason.DRIVE_HOME, db)
     return True
     try:
         return_val = requests.get(settings['development']['URL']['myq_garage'])

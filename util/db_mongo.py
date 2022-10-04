@@ -25,6 +25,14 @@ class DBClient:
         except Exception as e:
             logger.error("get_tesla_database::::: Error getting mongodb client conn to DB " + str(e))
 
+    def set_tesla_location_is_home_value(self,bol_value):
+        #'tesla_location'].find_one({'_id': 'current'})['is_home']
+        myquery = {"_id": "current"}
+        new_values = {"$set": {"is_home": bol_value}}
+        self.tesla_database['tesla_location'].update_one(myquery, new_values)
+        logger.debug('set_tesla_location_is_home_value::::: Updating ifttt_trigger_lock value to' + str(bol_value))
+
+
     def set_ifttt_trigger_lock(self, bol_val):
         myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
         new_values = {"$set": {"lock": bol_val}}
@@ -71,4 +79,6 @@ class DBClient:
 
 if __name__ == "__main__":
     obj = DBClient()
-    print(obj.set_door_open_status("mababio"))
+    tesladb =  obj.get_tesla_database()
+    tesladb['tesla_climate_status'].find_one({'id':'enum'})['climate_state']
+    #print(obj.set_door_open_status("mababio"))

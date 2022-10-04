@@ -81,6 +81,7 @@ def tesla_automation():
     if tesla_tap.confirmation_before_armed():
         g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "garage"}, {"$set": {"opened_reason": "DRIVE_AWAY"}})
         g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "garage"}, {"$set": {"closed_reason": "DRIVE_AWAY"}})
+        g.db.get_tesla_database()['tesla_location'].update_one({"_id": "current"}, {"$set": {"is_home": False}})
         notification.send_push_notification('Trigger Tesla home automation!')
         logger.info('Trigger Tesla home automation!')
         tesla_tap.tesla_home_automation_engine()

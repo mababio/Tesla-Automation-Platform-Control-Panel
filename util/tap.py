@@ -9,8 +9,6 @@ import util.garage as garage
 from util import tesla_proximity_scheduler
 
 
-
-
 class TAP:
 
     def __init__(self):
@@ -42,6 +40,8 @@ class TAP:
                     return False
 
     def trigger_tesla_home_automation(self):
+        garage.set_open_reason(garage.GarageOpenReason.DRIVE_HOME, self.db)
+
         garage.open_garage(self.db)
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')

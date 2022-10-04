@@ -36,7 +36,12 @@ class Tesla:
     def is_close(self):
         return_value = self.get_proximity()
         self.proximity_value = return_value['difference']
-        return True if return_value['is_on_arcuri'] and return_value['is_close'] else False
+        if return_value['is_on_arcuri'] and return_value['is_close']:
+            self.db.set_tesla_location_is_home_value(True)
+            return True
+        else:
+            return False
+        #return True if return_value['is_on_arcuri'] and return_value['is_close'] else False
 
     @retry(logger=logger, delay=0, tries=2)
     def get_proximity(self):
@@ -94,7 +99,7 @@ class Tesla:
 
 if __name__ == "__main__":
     obj = Tesla()
-   #  # print(obj.get_location())
+    obj.get_location()
    #  # # print(obj.is_battery_good()) and self.is_parked
    #  # param_prox={'lat':40.669900, 'lon': -74.095629}
     param_prox={'lat':40.663205, 'lon': -74.074595}

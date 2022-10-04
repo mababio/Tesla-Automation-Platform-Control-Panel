@@ -1,5 +1,6 @@
 .idea/
 test/test.py
+test/hold.py
 TAP.iml
 
 # Ignore dynaconf secret files

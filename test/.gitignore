@@ -1,4 +1,4 @@
-.idea/
+../.idea/
 test/test.py
 test/hold.py
 TAP.iml

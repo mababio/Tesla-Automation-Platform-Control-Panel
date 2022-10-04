@@ -33,16 +33,16 @@ class TAP:
                 self.confirmation_limit -= 5
             else:
                 if not garage.garage_is_open() and not self.tesla_obj.is_on_home_street():
-                    garage.set_close_reason(garage.GarageCloseReason.DRIVE_AWAY, self.db)
-                    garage.set_open_reason(garage.GarageOpenReason.DRIVE_AWAY, self.db)
+                    self.db.set_door_close_status(garage.GarageCloseReason.DRIVE_AWAY)
+                    self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_AWAY)
                     return True
                 else:
                     return False
 
     def trigger_tesla_home_automation(self):
-        garage.set_open_reason(garage.GarageOpenReason.DRIVE_HOME, self.db)
+        self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
 
-        garage.open_garage(self.db)
+        garage.open_garage()
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
         job = tesla_proximity_scheduler.disable_job()

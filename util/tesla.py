@@ -41,7 +41,6 @@ class Tesla:
             return True
         else:
             return False
-        #return True if return_value['is_on_arcuri'] and return_value['is_close'] else False
 
     @retry(logger=logger, delay=0, tries=2)
     def get_proximity(self):
@@ -99,9 +98,9 @@ class Tesla:
 
 if __name__ == "__main__":
     obj = Tesla()
-    obj.get_location()
+    print(requests.get(settings['production']['URL']['tesla_info']).json()['vehicle_state']['is_user_present'])
    #  # # print(obj.is_battery_good()) and self.is_parked
    #  # param_prox={'lat':40.669900, 'lon': -74.095629}
-    param_prox={'lat':40.663205, 'lon': -74.074595}
-    prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
-    print(prox)
+   #  param_prox={'lat':40.663205, 'lon': -74.074595}
+   #  prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
+   #  print(prox)

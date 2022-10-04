@@ -26,12 +26,10 @@ class DBClient:
             logger.error("get_tesla_database::::: Error getting mongodb client conn to DB " + str(e))
 
     def set_tesla_location_is_home_value(self,bol_value):
-        #'tesla_location'].find_one({'_id': 'current'})['is_home']
         myquery = {"_id": "current"}
         new_values = {"$set": {"is_home": bol_value}}
         self.tesla_database['tesla_location'].update_one(myquery, new_values)
         logger.debug('set_tesla_location_is_home_value::::: Updating ifttt_trigger_lock value to' + str(bol_value))
-
 
     def set_ifttt_trigger_lock(self, bol_val):
         myquery = {"_id": "IFTTT_TRIGGER_LOCK"}
@@ -63,7 +61,7 @@ class DBClient:
         logger.debug('get_door_open_status::::: get_door_open_status: Getting door_open_status value')
         return self.tesla_database['garage'].find_one()['opened_reason']
 
-    def __get_saved_location(self):
+    def get_saved_location(self):
         return self.tesla_database['tesla_location'].find_one({'_id':'current'})
 
     def save_location(self, json_lat_lon):
@@ -75,6 +73,14 @@ class DBClient:
         future = self.publisher.publish(self.tesla_gps_save_mongodb_topic, data_str.encode("utf-8"))
         logger.info('save_location::::: sent latlon to pubsub')
         return future
+
+    def is_climate_turned_on_via_automation(self):
+        climate_state = self.tesla_database['tesla_climate_status'].find_one({'_id': 'enum'})['climate_state']
+        return True if climate_state == 'climate_automation' else False
+
+    def climate_turned_on_via_automation_before(self):
+        climate_turned_on_before = self.tesla_database['tesla_climate_status'].find_one({'_id': 'enum'})['climate_turned_on_before']
+        return True if climate_turned_on_before == 'True' else False
 
 
 if __name__ == "__main__":

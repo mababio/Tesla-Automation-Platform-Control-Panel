@@ -7,6 +7,7 @@ from config import settings
 
 @retry(logger=logger, delay=2, tries=2)
 def send_sms(message):
+    number=''
     account_sid = 'ACee89a17cae64509e882c10346e0b5383'
     auth_token = '2cb6371ce7895e94d3a45fedacb39e6f'
     try:

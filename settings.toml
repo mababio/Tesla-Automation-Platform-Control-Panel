@@ -6,7 +6,7 @@ foo = 'mike'
 default_temp = "22.7778"
 garage_open_limit = 100
 confirmation_limit = 100
-mongo_client_url = "mongodb+srv://mababio:aCyCNd9OcpDCOovX@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority"
+mongo_client_url = "mongodb+srv://mababio:mongodb@home-automation.mplvx.mongodb.net/?retryWrites=true&w=majority"
 scheduler_job = 'projects/ensure-dev-zone/locations/us-east4/jobs/32661473461610032511'
 
 [production.pub_sub.gps]

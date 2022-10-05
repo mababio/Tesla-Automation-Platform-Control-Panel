@@ -11,13 +11,13 @@ db = db_client.tesla_database
 def test_garage_is_open():
     assert type(garage.garage_is_open()) is bool
 
-
-def test_open_garage():
-    assert False
-
-
-def test_close_garage():
-    assert False
+#
+# def test_open_garage():
+#     assert False
+#
+#
+# def test_close_garage():
+#     assert False
 
 
 # def test_set_open_reason():

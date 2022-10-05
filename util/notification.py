@@ -7,6 +7,7 @@ from config import settings
 
 @retry(logger=logger, delay=2, tries=2)
 def send_sms(message):
+    number=''
 REMOVED
 REMOVED
     try:

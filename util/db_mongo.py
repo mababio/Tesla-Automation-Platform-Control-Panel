@@ -16,7 +16,7 @@ class DBClient:
                                                                       ['gps']['project'],
                                                                       settings['production']['pub_sub']['gps']['topic'])
         try:
-            client = pymongo.MongoClient(settings['production']['mongo_client_url'], server_api=ServerApi('1'))
+REMOVED
             self.tesla_database = client['tesla']
         except Exception as e:
             logger.error("DBClient__init__::::: Issue with connecting to Mongodb: " + str(e))

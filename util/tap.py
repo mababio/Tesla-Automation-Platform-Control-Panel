@@ -41,12 +41,11 @@ class TAP:
 
     def trigger_tesla_home_automation(self):
         self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
-
         garage.open_garage()
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
         job = tesla_proximity_scheduler.disable_job()
-        if job.state is job.State.DISABLED:
+        if job.state is job.State.PAUSED:
             notification.send_push_notification('job has been disabled!')
         else:
             logger.error("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")

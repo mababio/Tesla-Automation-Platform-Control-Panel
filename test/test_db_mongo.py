@@ -1,10 +1,7 @@
 import random
 import time
-
 import pymongo
 from datetime import datetime
-from datetime import datetime
-
 from pytz import timezone
 from util import db_mongo, garage
 
@@ -111,6 +108,7 @@ def test_get_door_open_status():
     obj.set_door_open_status(garage.GarageOpenReason.DRIVE_AWAY)
     assert obj.get_door_open_status() == garage.GarageOpenReason.DRIVE_AWAY.value
     obj.set_door_open_status(original_value)
+
 
 def test_get_saved_location():
     assert type(obj.get_saved_location()) is dict

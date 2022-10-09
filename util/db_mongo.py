@@ -12,6 +12,8 @@ class DBClient:
 
     def __init__(self):
         self.publisher = pubsub_v1.PublisherClient()
+        self.garage_control = self.publisher.topic_path(settings['production']['pub_sub']['garage']['project']
+                                                        ,settings['production']['pub_sub']['garage']['topic'])
         self.tesla_gps_save_mongodb_topic = self.publisher.topic_path(settings['production']['pub_sub']
                                                                       ['gps']['project'],
                                                                       settings['production']['pub_sub']['gps']['topic'])
@@ -89,6 +91,20 @@ class DBClient:
         logger.info('save_location::::: sent latlon to pubsub')
         return future
 
+    def publish_open_garage(self):
+        if not garage.garage_is_open():
+            return self.publisher.publish(self.garage_control, 'open'.encode("utf-8"))
+        else:
+            notification.send_push_notification('Will not open garage because it appears it\'s open already')
+            logger.error('publish_open_garage::::: Will not open garage becuase it appears it\'s open already')
+
+    def publish_close_garage(self):
+        if garage.garage_is_open():
+            return self.publisher.publish(self.garage_control, 'close'.encode("utf-8"))
+        else:
+            notification.send_push_notification('Will not open garage because it appears it\'s open already')
+            logger.error('publish_open_garage::::: Will not open garage becuase it appears it\'s open already')
+
     def is_climate_turned_on_via_automation(self):
         climate_state = self.tesla_database['tesla_climate_status'].find_one({'_id': 'enum'})['climate_state']
         return True if climate_state == 'climate_automation' else False
@@ -115,3 +131,4 @@ class DBClient:
 
 if __name__ == "__main__":
     obj = DBClient()
+    obj.publish_close_garage()

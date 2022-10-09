@@ -10,6 +10,10 @@ mongo_client_url = 'mongodb+srv://mababio:mongodb@home-automation.mplvx.mongodb.
 
 scheduler_job = 'projects/ensure-dev-zone/locations/us-east4/jobs/32661473461610032511'
 
+[production.pub_sub.garage]
+topic = 'garage-control'
+project = 'ensure-dev-zone'
+
 [production.pub_sub.gps]
 topic = 'tesla-gps-save-mongodb'
 project = 'ensure-dev-zone'

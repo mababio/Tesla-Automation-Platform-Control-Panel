@@ -3,6 +3,7 @@ import requests
 from config import settings
 from util.logs import logger
 from util.notification import send_push_notification
+from util.db_mongo import DBClient
 
 
 class GarageCloseReason(Enum):
@@ -26,7 +27,8 @@ def open_garage():
     send_push_notification('Would of opened the garage')
     return True
     try:
-        return_val = requests.get(settings['development']['URL']['myq_garage'])
+        DBClient().publish_open_garage()
+        #return_val = requests.get(settings['development']['URL']['myq_garage'])
         ###set_open___reason(GarageOpenReason.DRIVE_HOME, db)     DONT USE THIS ...
         # FUNCTION DOES NOT EXIST AND FLAG HAS BEEN SET IN trigger_tesla_home_automation
         return True if return_val else False

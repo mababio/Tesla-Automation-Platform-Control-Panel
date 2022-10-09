@@ -7,6 +7,7 @@ from util import tap
 from util import notification
 from util.logs import logger
 import util.garage as garage
+import util.tesla_proximity_scheduler as scheduler
 from util.tesla import Tesla
 
 app = Flask(__name__)
@@ -54,15 +55,18 @@ def garage_door_closed():
 @app.route("/long_term")
 def kick_off_job_long_term_bg():
     logger.info('kick_off_job_long_term_bg::::: Kicking off :::::')
-    if g.db.get_tesla_database()['garage'].find_one()['opened_reason'] == 'DRIVE_AWAY':
-        g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "True"}})
+    if g.db.get_door_open_status() == 'DRIVE_AWAY':
+        g.db.set_ifttt_trigger_lock("True")
         tesla_tap = tap.TAP()
         executor.submit(tesla_tap.tesla_home_automation_engine)
         return 'Scheduled a job'
     else:
         logger.error('kick_off_job_long_term_bg::::: Appears car is home and this function should not run')
         notification.send_push_notification\
-            ('kick_off_job_long_term_bg::::: Appears car is home and this function should not run')
+            ('kick_off_job_long_term_bg::::: Appears car is home and this function should not run...'
+             ' pausing gcp cloud scheulder')
+        scheduler.disable_job()
+
         return 'kick_off_job_long_term_bg::::: Appears car is home and this function should not run'
 
 

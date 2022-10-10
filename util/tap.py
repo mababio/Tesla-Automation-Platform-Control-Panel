@@ -18,6 +18,7 @@ class TAP:
         self.confirmation_limit = settings['production']['confirmation_limit']
         self.db = db_mongo.DBClient()
         self.tesla_obj = tesla.Tesla()
+        self.safety = True
 
     def confirmation_before_armed(self):
         while garage.garage_is_open() and not self.garage_open_limit == 0:
@@ -59,7 +60,7 @@ class TAP:
     @retry(logger=logger, delay=300, tries=3)
     def tesla_home_automation_engine(self):
         try:
-            while not self.tesla_obj.is_close():
+            while not self.tesla_obj.is_close() and self.safety:
                 if self.tesla_obj.proximity_value < .07:
                     notification.send_push_notification("Delay for 1 secs")
                     time.sleep(1)
@@ -94,6 +95,7 @@ class TAP:
                         .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
                     break
             else:
+                self.safety = False
                 self.trigger_tesla_home_automation()
                 return True
         except Exception as e:

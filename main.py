@@ -27,12 +27,11 @@ def before_request():
 @app.route("/open")
 def kick_off_job_ifttt_open_bg():
     logger.info('kick_off_job_ifttt_open_bg: start of the /open flask route')
-    if g.db.get_tesla_database()['tesla_trigger'].find_one()['lock'] != 'False' or \
-            g.db.get_tesla_database()['garage'].find_one()['opened_reason'] == 'DRIVE_AWAY':
+    if g.db.get_ifttt_trigger_lock() != 'False' or g.db.get_door_open_status() == 'DRIVE_AWAY':
         notification.send_push_notification("Process is already running")
         return 'Process is already running'
     else:
-        g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "True"}})
+        g.db.set_ifttt_trigger_lock("True")
         executor.submit(tesla_automation)
         return 'Scheduled a job'
 

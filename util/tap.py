@@ -6,8 +6,7 @@ import util.tesla as tesla
 from util.logs import logger
 from config import settings
 import util.garage as garage
-
-
+from util import tesla_proximity_scheduler
 
 
 class TAP:
@@ -19,6 +18,7 @@ class TAP:
         self.confirmation_limit = settings['production']['confirmation_limit']
         self.db = db_mongo.DBClient()
         self.tesla_obj = tesla.Tesla()
+        self.safety = True
 
     def confirmation_before_armed(self):
         while garage.garage_is_open() and not self.garage_open_limit == 0:
@@ -34,45 +34,67 @@ class TAP:
                 self.confirmation_limit -= 5
             else:
                 if not garage.garage_is_open() and not self.tesla_obj.is_on_home_street():
-                    garage.set_close_reason(garage.GarageCloseReason.DRIVE_AWAY, self.db)
+                    self.db.set_door_close_status(garage.GarageCloseReason.DRIVE_AWAY)
+                    self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_AWAY)
                     return True
                 else:
                     return False
 
     def trigger_tesla_home_automation(self):
-        garage.open_garage(self.db)
+        self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
+        self.db.publish_open_garage()
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
+        job = tesla_proximity_scheduler.disable_job()
+        if job.state is job.State.PAUSED:
+            notification.send_push_notification('job has been disabled!')
+        else:
+            logger.error("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
+            notification.send_push_notification("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
+        notification.send_push_notification('Automation Done')
+        return True
 
     def cleanup(self):
-        notification.send_push_notification('Setinng job done')
+        notification.send_push_notification('Closing out Run')
 
     @retry(logger=logger, delay=300, tries=3)
     def tesla_home_automation_engine(self):
         try:
-            while not self.tesla_obj.is_close():
+            while not self.tesla_obj.is_close() and self.safety:
                 if self.tesla_obj.proximity_value < .07:
-                    continue
-                elif self.tesla_obj.proximity_value < .3:
                     notification.send_push_notification("Delay for 1 secs")
                     time.sleep(1)
+                elif self.tesla_obj.proximity_value < .3:
+                    notification.send_push_notification("Delay for 2 secs")
+                    time.sleep(2)
                 elif self.tesla_obj.proximity_value < 1:
                     notification.send_push_notification("Delay for 15 sec")
                     time.sleep(10)
                 elif self.tesla_obj.proximity_value < 3:
-                    notification.send_push_notification("Delay for 2 mins")
-                    time.sleep(120)
+                    notification.send_push_notification("Delay for 2 minutes")
+                    tesla_proximity_scheduler.schedule_proximity_job(2)
+                    self.db.set_ifttt_trigger_lock("False")
+                    break
                 elif self.tesla_obj.proximity_value < 7:
-                    notification.send_push_notification("Delay for 5 mins")
-                    time.sleep(300)
+                    notification.send_push_notification("Delay for 5 minutes")
+                    tesla_proximity_scheduler.schedule_proximity_job(5)
+                    self.db.set_ifttt_trigger_lock("False")
+                    break
                 elif self.tesla_obj.proximity_value < 10:
-                    notification.send_push_notification("Delay for 10 mins")
-                    time.sleep(600)
+                    notification.send_push_notification("Delay for 10 minutes")
+                    tesla_proximity_scheduler.schedule_proximity_job(10)
+                    self.db.set_ifttt_trigger_lock("False")
+                    break
                 else:
-                    notification.send_push_notification("Delay for 15 mins")
-                    time.sleep(900)
+                    notification.send_push_notification("Delay for 15 minutes")
+                    tesla_proximity_scheduler.schedule_proximity_job(15)
+                    self.db.set_ifttt_trigger_lock("False")
+                    break
             else:
+                self.safety = False
                 self.trigger_tesla_home_automation()
+                self.trigger_tesla_home_automation()
+                return True
         except Exception as e:
             notification.send_push_notification('tesla_home_automation_engine: Issue found in the while loop ' + str(e))
             logger.error('tesla_home_automation_engine: Issue found in the while loop ' + str(e))
@@ -81,7 +103,7 @@ class TAP:
 
 if __name__ == "__main__":
     obj = TAP()
-    print(obj.garage_is_open())
+    print(garage.garage_is_open())
     # print(obj.tesla_obj.is_close())
 
     # obj.tesla_obj.get_location()

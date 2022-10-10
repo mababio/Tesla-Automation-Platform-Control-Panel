@@ -73,26 +73,22 @@ class TAP:
                 elif self.tesla_obj.proximity_value < 3:
                     notification.send_push_notification("Delay for 2 minutes")
                     tesla_proximity_scheduler.schedule_proximity_job(2)
-                    self.db.get_tesla_database()['tesla_trigger'] \
-                        .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
+                    self.db.set_ifttt_trigger_lock("False")
                     break
                 elif self.tesla_obj.proximity_value < 7:
                     notification.send_push_notification("Delay for 5 minutes")
                     tesla_proximity_scheduler.schedule_proximity_job(5)
-                    self.db.get_tesla_database()['tesla_trigger']\
-                        .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
+                    self.db.set_ifttt_trigger_lock("False")
                     break
                 elif self.tesla_obj.proximity_value < 10:
                     notification.send_push_notification("Delay for 10 minutes")
                     tesla_proximity_scheduler.schedule_proximity_job(10)
-                    self.db.get_tesla_database()['tesla_trigger'] \
-                        .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
+                    self.db.set_ifttt_trigger_lock("False")
                     break
                 else:
                     notification.send_push_notification("Delay for 15 minutes")
                     tesla_proximity_scheduler.schedule_proximity_job(15)
-                    self.db.get_tesla_database()['tesla_trigger'] \
-                        .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
+                    self.db.set_ifttt_trigger_lock("False")
                     break
             else:
                 self.safety = False

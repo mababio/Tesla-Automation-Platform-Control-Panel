@@ -40,17 +40,25 @@ class TAP:
                     return False
 
     def trigger_tesla_home_automation(self):
-        self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
-        self.db.publish_open_garage()
-        notification.send_push_notification('Garage door opening!')
-        logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
-        job = tesla_proximity_scheduler.disable_job()
-        if job.state is job.State.PAUSED:
-            notification.send_push_notification('job has been disabled!')
+        if getattr(sum, 'has_run', False):
+            logger.error('trigger_tesla_home_automation::::: Attempts to run this again have been stopped!!!')
+            notification.send_push_notification('trigger_tesla_home_automation::::: '
+                                                'Attempts to run this again have been stopped!!!')
+            return
         else:
-            logger.error("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
-            notification.send_push_notification("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
-        notification.send_push_notification('Automation Done')
+            sum.has_run = True
+            self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
+            self.db.publish_open_garage()
+
+            notification.send_push_notification('Garage door opening!')
+            logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
+            job = tesla_proximity_scheduler.disable_job()
+            if job.state is job.State.PAUSED:
+                notification.send_push_notification('job has been disabled!')
+            else:
+                logger.error("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
+                notification.send_push_notification("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
+            notification.send_push_notification('Automation Done')
 
     def cleanup(self):
         notification.send_push_notification('Closing out Run')
@@ -92,6 +100,7 @@ class TAP:
                         .update_one({"_id": "IFTTT_TRIGGER_LOCK"}, {"$set": {"lock": "False"}})
                     break
             else:
+                self.trigger_tesla_home_automation()
                 self.trigger_tesla_home_automation()
         except Exception as e:
             notification.send_push_notification('tesla_home_automation_engine: Issue found in the while loop ' + str(e))

@@ -41,7 +41,7 @@ class TAP:
 
     def trigger_tesla_home_automation(self):
         self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
-        garage.open_garage()
+        self.db.publish_open_garage()
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
         job = tesla_proximity_scheduler.disable_job()

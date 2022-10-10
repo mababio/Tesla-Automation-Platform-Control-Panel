@@ -50,15 +50,13 @@ def test_get_location():
     assert type(testing_dict['lat']) is float
     assert type(testing_dict['lon']) is float
     if obj.is_tesla_moving():
-        assert get_db_latlon_age() < 1
+        assert get_db_latlon_age() <= 1
         assert db.is_climate_turned_on_via_automation() is False
+    elif get_db_latlon_age() > 5:
+        assert db.climate_turned_on_via_automation_before() is True or \
+               db.is_climate_turned_on_via_automation() is True
     else:
-        assert get_db_latlon_age() >= 1
-        if get_db_latlon_age() > 5:
-            assert db.climate_turned_on_via_automation_before() is True or\
-                   db.is_climate_turned_on_via_automation() is True
-        else:
-            assert db.is_climate_turned_on_via_automation() is False
+        assert db.is_climate_turned_on_via_automation() is False
 
 
 def test_is_on_home_street():

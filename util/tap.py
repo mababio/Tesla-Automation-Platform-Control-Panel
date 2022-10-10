@@ -45,20 +45,19 @@ class TAP:
             notification.send_push_notification('trigger_tesla_home_automation::::: '
                                                 'Attempts to run this again have been stopped!!!')
             return
-        else:
-            sum.has_run = True
-            self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
-            self.db.publish_open_garage()
+        sum.has_run = True
+        self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
+        self.db.publish_open_garage()
 
-            notification.send_push_notification('Garage door opening!')
-            logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
-            job = tesla_proximity_scheduler.disable_job()
-            if job.state is job.State.PAUSED:
-                notification.send_push_notification('job has been disabled!')
-            else:
-                logger.error("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
-                notification.send_push_notification("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
-            notification.send_push_notification('Automation Done')
+        notification.send_push_notification('Garage door opening!')
+        logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
+        job = tesla_proximity_scheduler.disable_job()
+        if job.state is job.State.PAUSED:
+            notification.send_push_notification('job has been disabled!')
+        else:
+            logger.error("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
+            notification.send_push_notification("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
+        notification.send_push_notification('Automation Done')
 
     def cleanup(self):
         notification.send_push_notification('Closing out Run')

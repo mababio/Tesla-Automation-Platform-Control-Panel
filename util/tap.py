@@ -40,15 +40,8 @@ class TAP:
                     return False
 
     def trigger_tesla_home_automation(self):
-        if getattr(sum, 'has_run', False):
-            logger.error('trigger_tesla_home_automation::::: Attempts to run this again have been stopped!!!')
-            notification.send_push_notification('trigger_tesla_home_automation::::: '
-                                                'Attempts to run this again have been stopped!!!')
-            return
-        sum.has_run = True
         self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
         self.db.publish_open_garage()
-
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
         job = tesla_proximity_scheduler.disable_job()
@@ -58,6 +51,7 @@ class TAP:
             logger.error("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
             notification.send_push_notification("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
         notification.send_push_notification('Automation Done')
+        return True
 
     def cleanup(self):
         notification.send_push_notification('Closing out Run')
@@ -67,10 +61,11 @@ class TAP:
         try:
             while not self.tesla_obj.is_close():
                 if self.tesla_obj.proximity_value < .07:
-                    continue
-                elif self.tesla_obj.proximity_value < .3:
                     notification.send_push_notification("Delay for 1 secs")
                     time.sleep(1)
+                elif self.tesla_obj.proximity_value < .3:
+                    notification.send_push_notification("Delay for 2 secs")
+                    time.sleep(2)
                 elif self.tesla_obj.proximity_value < 1:
                     notification.send_push_notification("Delay for 15 sec")
                     time.sleep(10)
@@ -100,7 +95,7 @@ class TAP:
                     break
             else:
                 self.trigger_tesla_home_automation()
-                self.trigger_tesla_home_automation()
+                return True
         except Exception as e:
             notification.send_push_notification('tesla_home_automation_engine: Issue found in the while loop ' + str(e))
             logger.error('tesla_home_automation_engine: Issue found in the while loop ' + str(e))

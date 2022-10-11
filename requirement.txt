@@ -15,6 +15,7 @@ dynaconf==3.1.11
 #pymongo[srv]
 google-cloud-scheduler==2.7.1
 googleapis-common-protos==1.56.4
+google-auth==2.12.0
 
 
 

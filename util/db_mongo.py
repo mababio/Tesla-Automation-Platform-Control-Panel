@@ -38,7 +38,7 @@ REMOVED
         myquery = {"_id": "current"}
         new_values = {"$set": {"is_home": bol_value}}
         self.tesla_database['tesla_location'].update_one(myquery, new_values)
-        logger.debug('set_tesla_location_is_home_value::::: Updating ifttt_trigger_lock value to' + str(bol_value))
+        logger.debug('set_tesla_location_is_home_value::::: this was trigger most likely b/c we have reached home' + str(bol_value))
 
     def set_ifttt_trigger_lock(self, bol_val):
         myquery = {"_id": "IFTTT_TRIGGER_LOCK"}

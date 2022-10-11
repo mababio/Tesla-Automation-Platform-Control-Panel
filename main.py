@@ -54,7 +54,7 @@ def garage_door_closed():
 @app.route("/long_term")
 def kick_off_job_long_term_bg():
     logger.info('kick_off_job_long_term_bg::::: Kicking off :::::')
-    if g.db.get_door_open_status() == 'DRIVE_AWAY':
+    if g.db.get_door_open_status() == 'DRIVE_AWAY' and g.db.get_ifttt_trigger_lock() != "True":
         g.db.set_ifttt_trigger_lock("True")
         tesla_tap = tap.TAP()
         executor.submit(tesla_tap.tesla_home_automation_engine)

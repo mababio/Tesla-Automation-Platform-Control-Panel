@@ -1,5 +1,4 @@
 import time
-from retry import retry
 import util.db_mongo as db_mongo
 import util.notification as notification
 import util.tesla as tesla
@@ -57,7 +56,6 @@ class TAP:
     def cleanup(self):
         notification.send_push_notification('Closing out Run')
 
-    @retry(logger=logger, delay=300, tries=3)
     def tesla_home_automation_engine(self):
         try:
             while not self.tesla_obj.is_close() and self.safety:
@@ -92,7 +90,6 @@ class TAP:
                     break
             else:
                 self.safety = False
-                self.trigger_tesla_home_automation()
                 self.trigger_tesla_home_automation()
                 return True
         except Exception as e:

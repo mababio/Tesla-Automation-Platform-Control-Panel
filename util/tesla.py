@@ -32,7 +32,7 @@ class Tesla:
             chanify.send_push_notification('is_tesla_moving:::: Issue with tesla location Google function ' + str(e))
             raise
 
-    @retry(logger=logger, delay=2, tries=2)
+    @retry(logger=logger, delay=10, tries=2, backoff=2)
     def is_close(self):
         return_value = self.get_proximity()
         self.proximity_value = return_value['difference']
@@ -42,7 +42,7 @@ class Tesla:
         else:
             return False
 
-    @retry(logger=logger, delay=0, tries=2)
+    @retry(logger=logger, delay=10, tries=2, backoff=2)
     def get_proximity(self):
         param_prox = self.get_location()
         if isinstance(param_prox, dict):
@@ -54,7 +54,7 @@ class Tesla:
         else:
             raise TypeError('get_location GCP function return something other than dict')
 
-    @retry(logger=logger, delay=10, tries=3)
+    @retry(logger=logger, delay=10, tries=2, backoff=2)
     def get_location(self):
         try:
             r_location = requests.get(self.url_tesla_location).json()

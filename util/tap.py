@@ -91,7 +91,6 @@ class TAP:
             else:
                 self.safety = False
                 self.trigger_tesla_home_automation()
-                self.trigger_tesla_home_automation()
                 return True
         except Exception as e:
             notification.send_push_notification('tesla_home_automation_engine: Issue found in the while loop ' + str(e))

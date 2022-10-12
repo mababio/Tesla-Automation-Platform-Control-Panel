@@ -68,8 +68,10 @@ def kick_off_job_long_term_bg():
 @app.route("/ifttt_unlock_tesla")
 def kick_off_ifttt_unlock_tesla():
     try:
+        notification.send_push_notification('step 1')
         professor = Tesla()
         professor.unlock_tesla()
+        notification.send_push_notification('step 3')
     except Exception as e:
         notification.send_push_notification('Faced issue  unlocking telsa')
 

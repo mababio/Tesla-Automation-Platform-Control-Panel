@@ -98,7 +98,7 @@ class Tesla:
     def unlock_tesla(self):
         if self.is_close() and not self.is_tesla_moving():
             try:
-                requests.post(settings['production']['URL']['tesla_unlock'], {"desire_state": "unlock"})
+                requests.post(settings['production']['URL']['tesla_unlock'], json={"desire_state": "unlock"})
                 chanify.send_push_notification("Tesla Unlocked")
             except Exception as e:
                 logger.error("unlock_tesla::::: Issue with http request to :::: " +

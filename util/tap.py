@@ -5,7 +5,7 @@ import util.tesla as tesla
 from util.logs import logger
 from config import settings
 import util.garage as garage
-from util import tesla_proximity_scheduler
+from util import gcp_scheduler as scheduler
 
 
 class TAP:
@@ -44,7 +44,7 @@ class TAP:
         self.db.publish_open_garage()
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
-        job = tesla_proximity_scheduler.disable_job()
+        job = scheduler.disable_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
         if job.state is job.State.PAUSED:
             notification.send_push_notification('job has been disabled!')
         else:
@@ -70,22 +70,22 @@ class TAP:
                     time.sleep(10)
                 elif self.tesla_obj.proximity_value < 3:
                     notification.send_push_notification("Delay for 2 minutes")
-                    tesla_proximity_scheduler.schedule_proximity_job(2)
+                    scheduler.schedule_proximity_job(2)
                     self.db.set_ifttt_trigger_lock("False")
                     break
                 elif self.tesla_obj.proximity_value < 7:
                     notification.send_push_notification("Delay for 5 minutes")
-                    tesla_proximity_scheduler.schedule_proximity_job(5)
+                    scheduler.schedule_proximity_job(5)
                     self.db.set_ifttt_trigger_lock("False")
                     break
                 elif self.tesla_obj.proximity_value < 10:
                     notification.send_push_notification("Delay for 10 minutes")
-                    tesla_proximity_scheduler.schedule_proximity_job(10)
+                    scheduler.schedule_proximity_job(10)
                     self.db.set_ifttt_trigger_lock("False")
                     break
                 else:
                     notification.send_push_notification("Delay for 15 minutes")
-                    tesla_proximity_scheduler.schedule_proximity_job(15)
+                    scheduler.schedule_proximity_job(15)
                     self.db.set_ifttt_trigger_lock("False")
                     break
             else:

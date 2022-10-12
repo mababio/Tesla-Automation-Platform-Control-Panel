@@ -7,7 +7,7 @@ from util import tap
 from util import notification
 from util.logs import logger
 import util.garage as garage
-import util.tesla_proximity_scheduler as scheduler
+import util.gcp_scheduler as scheduler
 from util.tesla import Tesla
 
 app = Flask(__name__)
@@ -60,7 +60,7 @@ def kick_off_job_long_term_bg():
         notification.send_push_notification('kick_off_job_long_term_bg::::: Appears car is home and this function '
                                             'should not run... '
                                             ' pausing gcp cloud scheulder')
-        scheduler.disable_job()
+        scheduler.disable_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
 
         return 'kick_off_job_long_term_bg::::: Appears car is home and this function should not run'
 
@@ -68,12 +68,11 @@ def kick_off_job_long_term_bg():
 @app.route("/ifttt_unlock_tesla")
 def kick_off_ifttt_unlock_tesla():
     try:
-        notification.send_push_notification('step 1')
         professor = Tesla()
         professor.unlock_tesla()
-        notification.send_push_notification('step 3')
+        scheduler.enable_job(scheduler.schedule_Jobs.TESLA_LOCK_CAR)
     except Exception as e:
-        notification.send_push_notification('Faced issue  unlocking telsa')
+        notification.send_push_notification('Faced issue  unlocking telsa' + str(e))
 
 
 def garage_door_closed():

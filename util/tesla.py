@@ -95,10 +95,22 @@ class Tesla:
             logger.warning("is_on_home_street: output of geocode is not as expected:" + str(e))
             raise
 
+    def unlock_tesla(self):
+        if self.is_close() and not self.is_tesla_moving():
+            try:
+                response = requests.get(settings['production']['URL']['tesla_unlock']).text
+                chanify.send_push_notification("Tesla Unlocked")
+                chanify.send_push_notification(response)
+            except Exception as e:
+                logger.error("unlock_tesla::::: Issue with http request to :::: " +
+                             settings['production']['URL']['tesla_unlock'])
+                raise
+
 
 if __name__ == "__main__":
     obj = Tesla()
-    print(requests.get(settings['production']['URL']['tesla_info']).json()['vehicle_state']['is_user_present'])
+    obj.unlock_tesla()
+    # print(requests.get(settings['production']['URL']['tesla_info']).json()['vehicle_state']['is_user_present'])
    #  # # print(obj.is_battery_good()) and self.is_parked
    #  # param_prox={'lat':40.669900, 'lon': -74.095629}
    #  param_prox={'lat':40.663205, 'lon': -74.074595}

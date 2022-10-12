@@ -47,10 +47,6 @@ def kick_off_job_ifttt_close_bg():
         return 'Garage Door closed'
 
 
-def garage_door_closed():
-    g.db.reset_all_flags_tap_is_complete()
-
-
 @app.route("/long_term")
 def kick_off_job_long_term_bg():
     logger.info('kick_off_job_long_term_bg::::: Kicking off :::::')
@@ -61,21 +57,34 @@ def kick_off_job_long_term_bg():
         return 'Scheduled a job'
     else:
         logger.error('kick_off_job_long_term_bg::::: Appears car is home and this function should not run')
-        notification.send_push_notification\
-            ('kick_off_job_long_term_bg::::: Appears car is home and this function should not run...'
-             ' pausing gcp cloud scheulder')
+        notification.send_push_notification('kick_off_job_long_term_bg::::: Appears car is home and this function '
+                                            'should not run... '
+                                            ' pausing gcp cloud scheulder')
         scheduler.disable_job()
 
         return 'kick_off_job_long_term_bg::::: Appears car is home and this function should not run'
+
+
+@app.route("/ifttt_unlock_tesla")
+def kick_off_ifttt_unlock_tesla():
+    try:
+        professor = Tesla()
+        professor.unlock_tesla()
+    except Exception as e:
+        notification.send_push_notification('Faced issue  unlocking telsa')
+
+
+def garage_door_closed():
+    g.db.reset_all_flags_tap_is_complete()
 
 
 def tesla_automation():
     tesla_tap = tap.TAP()
     professor = Tesla()
     if tesla_tap.confirmation_before_armed():
-        g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "garage"}, {"$set": {"opened_reason": "DRIVE_AWAY"}})
-        g.db.get_tesla_database()['tesla_trigger'].update_one({"_id": "garage"}, {"$set": {"closed_reason": "DRIVE_AWAY"}})
-        g.db.get_tesla_database()['tesla_location'].update_one({"_id": "current"}, {"$set": {"is_home": False}})
+        g.db.set_door_open_status(garage.GarageOpenReason.DRIVE_AWAY)
+        g.db.set_door_close_status(garage.GarageCloseReason.DRIVE_AWAY)
+        g.db.set_tesla_location_is_home_value(False)
         notification.send_push_notification('Trigger Tesla home automation!')
         logger.info('Trigger Tesla home automation!')
         tesla_tap.tesla_home_automation_engine()

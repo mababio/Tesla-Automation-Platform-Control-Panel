@@ -131,4 +131,4 @@ REMOVED
 
 if __name__ == "__main__":
     obj = DBClient()
-    obj.publish_close_garage()
+    obj.reset_all_flags_tap_is_complete()

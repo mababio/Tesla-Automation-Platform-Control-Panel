@@ -5,7 +5,7 @@ steps:
 
   - name: python
     entrypoint: python
-    args: [ "load_settings.py", $PROJECT_ID, ]
+    args: [ "load_settings.py", $PROJECT_NUMBER ]
     id: load_settings_toml
 
   - name: gcr.io/cloud-builders/docker

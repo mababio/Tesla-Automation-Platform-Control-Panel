@@ -6,8 +6,8 @@ COPY util util/
 COPY config.py ./
 COPY settings.toml ./
 COPY main.py ./
-COPY requirement.txt ./
-RUN pip install --no-cache-dir -r  requirement.txt
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r  requirements.txt
 RUN pip install 'pymongo[srv]'
 ENV PORT 8080
 # Timeout is set to 0 to disable the timeouts of the workers to allow Cloud Run to handle instance scaling.

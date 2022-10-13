@@ -1,8 +1,9 @@
-../.idea/
+.idea/
 test/test.py
 test/hold.py
 TAP.iml
 application_default_credentials.json
-settings_.toml
+settings.toml
+**__pycache__**
 # Ignore dynaconf secret files
 .secrets.*

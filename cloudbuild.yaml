@@ -1,5 +1,9 @@
 steps:
   - name: python
+    entrypoint: pip
+    args: [ "install", "google-cloud-secret-manager" ]
+
+  - name: python
     entrypoint: python
     args: [ "load_settings.py", $PROJECT_ID, ]
     id: load_settings_toml

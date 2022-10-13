@@ -1,7 +1,7 @@
 steps:
   - name: python
     entrypoint: pip
-    args: [ "install", "google-cloud-secret-manager" ]
+    args: [ "install", "google-cloud-secret-manager", "google-cloud-core" ]
 
   - name: python
     entrypoint: python

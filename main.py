@@ -27,7 +27,7 @@ def before_request():
 @app.route("/open")
 def kick_off_job_ifttt_open_bg():
     logger.info('kick_off_job_ifttt_open_bg: start of the /open flask route')
-    if g.db.get_ifttt_trigger_lock() != 'False' or g.db.get_door_open_status() == 'DRIVE_AWAY':
+    if g.db.get_ifttt_trigger_lock() != 'False' or g.db.get_door_close_status() == 'DRIVE_AWAY':
         notification.send_push_notification("Process is already running")
         return 'Process is already running'
     else:

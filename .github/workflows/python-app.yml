@@ -32,6 +32,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f dev_requirement.txt ]; then pip install -r dev_requirement.txt; fi
+
+    - name: Load settings.toml file
+        run: |
+          python load_settings.py '${{ secrets.PROJECT_NUMBER }}' 
+
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

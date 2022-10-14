@@ -93,10 +93,12 @@ def tesla_automation():
         notification.send_push_notification(' Garage door has been open for 5 mins. would your like to close, '
                                             'leave open or are you'
                                             ' loading the bikes??')
+        g.db.set_ifttt_trigger_lock("False")
         notification.send_push_notification('automation Done')
     elif professor.is_on_home_street:
         notification.send_push_notification('Still on Arcui ct')
         notification.send_push_notification('automation Done')
+        g.db.set_ifttt_trigger_lock("False")
     tesla_tap.cleanup()
 
 

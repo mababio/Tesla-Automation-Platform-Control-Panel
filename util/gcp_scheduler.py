@@ -25,7 +25,7 @@ def schedule_proximity_job(delay_mins):
     request = scheduler_v1.UpdateJobRequest(job=job, update_mask=update_mask)
     job = client.update_job(request=request)
     if job.state is not job.State.ENABLED:
-        enable_job()
+        enable_job(schedule_Jobs.TESLA_LONG_TERM)
         return job
     else:
         return job

@@ -5,3 +5,10 @@ repos:
       - id: ggshield
         language_version: python3
         stages: [commit]
+  - repo: local
+    hooks:
+      - id: update GCP Secret
+        name: load_settings
+        entry: python load_settings.py $PROJECT_NUMBER
+        language: system
+        types: [ python ]

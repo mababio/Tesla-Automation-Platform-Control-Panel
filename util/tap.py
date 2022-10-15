@@ -40,8 +40,8 @@ class TAP:
                     return False
 
     def trigger_tesla_home_automation(self):
-        self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
         self.db.publish_open_garage()
+        self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
         job = scheduler.disable_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
@@ -60,11 +60,11 @@ class TAP:
         try:
             while not self.tesla_obj.is_close() and self.safety:
                 if self.tesla_obj.proximity_value < .07:
-                    notification.send_push_notification("Delay for 1 secs")
+                    notification.send_push_notification("Delay for 1 secs close by")
                     time.sleep(1)
                 elif self.tesla_obj.proximity_value < .3:
-                    notification.send_push_notification("Delay for 2 secs")
-                    time.sleep(2)
+                    notification.send_push_notification("Delay for 1 secs")
+                    time.sleep(1)
                 elif self.tesla_obj.proximity_value < 1:
                     notification.send_push_notification("Delay for 15 sec")
                     time.sleep(10)

@@ -20,7 +20,10 @@ def upload(project_number):
     with open('settings.toml', 'r') as outfile:
         payload = outfile.read().encode("UTF-8")
         response = client_secret_manager.add_secret_version(request={"parent": parent, "payload": {"data": payload}})
-        print(response)
+        if response.state == response.State.ENABLED:
+            return 'Settings.toml file was updated under GCP Secret Manager'
+        else:
+            return 'May have been an issue updating Settings.toml file under GCP Secret Manager'
 
 
 if __name__ == "__main__":

@@ -9,6 +9,6 @@ repos:
     hooks:
       - id: update GCP Secret
         name: upload_settings
-        entry: python load_settings.py upload $PROJECT_NUMBER
+        entry: ./upload_settings.sh
         language: system
         types: [ python ]

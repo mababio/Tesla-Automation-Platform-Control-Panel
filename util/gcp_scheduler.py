@@ -52,4 +52,4 @@ def enable_job(job):
 
 
 if __name__ == "__main__":
-    enable_job(schedule_Jobs.TESLA_LONG_TERM)
+    enable_job(schedule_Jobs.TESLA_LOCK_CAR)

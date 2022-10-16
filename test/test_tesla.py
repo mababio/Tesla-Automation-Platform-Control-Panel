@@ -31,8 +31,8 @@ def test_is_tesla_moving():
 
 
 def test_is_close():
-    assert type(obj.is_close()) is bool
-    if not obj.is_close():
+    assert type(obj.is_near()) is bool
+    if not obj.is_near():
         assert db.get_door_close_status() == garage.GarageCloseReason.DRIVE_AWAY.value
     else:
         assert db.get_door_close_status() == garage.GarageCloseReason.DRIVE_HOME.value
@@ -61,9 +61,9 @@ def test_get_location():
 
 def test_is_on_home_street():
     if obj.is_on_home_street():
-        assert obj.is_close() is True
+        assert obj.is_near() is True
     else:
-        assert obj.is_close() is False
+        assert obj.is_near() is False
 
 
 

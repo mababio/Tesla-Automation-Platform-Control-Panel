@@ -33,8 +33,6 @@ class TAP:
                 self.confirmation_limit -= 5
             else:
                 if not garage.garage_is_open() and not self.tesla_obj.is_on_home_street():
-                    self.db.set_door_close_status(garage.GarageCloseReason.DRIVE_AWAY)
-                    self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_AWAY)
                     return True
                 else:
                     return False
@@ -44,13 +42,12 @@ class TAP:
         self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
-        job = scheduler.disable_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
-        if job.state is job.State.PAUSED:
+        job = scheduler.pause_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
+        if job:
             notification.send_push_notification('job has been disabled!')
         else:
             logger.error("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
             notification.send_push_notification("Cloud Scheduler job has trouble disabling job. DISABLE NOW!!!!")
-        notification.send_push_notification('Automation Done')
         return True
 
     def cleanup(self):
@@ -58,7 +55,7 @@ class TAP:
 
     def tesla_home_automation_engine(self):
         try:
-            while not self.tesla_obj.is_close() and self.safety:
+            while not self.tesla_obj.is_near() and self.safety:
                 if self.tesla_obj.proximity_value < .07:
                     notification.send_push_notification("Delay for 1 secs close by")
                     time.sleep(1)
@@ -67,34 +64,27 @@ class TAP:
                     time.sleep(1)
                 elif self.tesla_obj.proximity_value < 1:
                     notification.send_push_notification("Delay for 15 sec")
-                    time.sleep(10)
+                    time.sleep(15)
                 elif self.tesla_obj.proximity_value < 3:
-                    notification.send_push_notification("Delay for 2 minutes")
-                    scheduler.schedule_proximity_job(2)
-                    self.db.set_ifttt_trigger_lock("False")
+                    scheduler.schedule_proximity_job(2, self.db)
                     break
                 elif self.tesla_obj.proximity_value < 7:
-                    notification.send_push_notification("Delay for 5 minutes")
-                    scheduler.schedule_proximity_job(5)
-                    self.db.set_ifttt_trigger_lock("False")
+                    scheduler.schedule_proximity_job(5, self.db)
                     break
                 elif self.tesla_obj.proximity_value < 10:
-                    notification.send_push_notification("Delay for 10 minutes")
-                    scheduler.schedule_proximity_job(10)
-                    self.db.set_ifttt_trigger_lock("False")
+                    scheduler.schedule_proximity_job(10, self.db)
                     break
                 else:
-                    notification.send_push_notification("Delay for 15 minutes")
-                    scheduler.schedule_proximity_job(15)
-                    self.db.set_ifttt_trigger_lock("False")
+                    scheduler.schedule_proximity_job(15, self.db)
                     break
             else:
-                self.safety = False
+                self.safety = False  # To prevent the while from accidentally running again
                 self.trigger_tesla_home_automation()
                 return True
         except Exception as e:
-            notification.send_push_notification('tesla_home_automation_engine: Issue found in the while loop ' + str(e))
-            logger.error('tesla_home_automation_engine: Issue found in the while loop ' + str(e))
+            notification.send_push_notification('tesla_home_automation_engine:::::: Issue found in the while loop '
+                                                + str(e))
+            logger.error('tesla_home_automation_engine:::::: Issue found in the while loop ' + str(e))
             raise
 
 
@@ -108,8 +98,6 @@ if __name__ == "__main__":
     #     obj.tesla_obj.get_location()
     #     time.sleep(2)
 
-    #print(obj.tesla_obj.proximity_value)
-    #notification.send_push_notification("Delay for 1 secsss")
-    #time.sleep(1)
-
-
+    # print(obj.tesla_obj.proximity_value)
+    # notification.send_push_notification("Delay for 1 secsss")
+    # time.sleep(1)

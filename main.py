@@ -60,7 +60,7 @@ def kick_off_job_long_term_bg():
         notification.send_push_notification('kick_off_job_long_term_bg::::: Appears car is home and this function '
                                             'should not run... '
                                             ' pausing gcp cloud scheulder')
-        scheduler.disable_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
+        scheduler.pause_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
 
         return 'kick_off_job_long_term_bg::::: Appears car is home and this function should not run'
 
@@ -69,8 +69,14 @@ def kick_off_job_long_term_bg():
 def kick_off_ifttt_unlock_tesla():
     try:
         professor = Tesla()
-        professor.unlock_tesla()
-        scheduler.enable_job(scheduler.schedule_Jobs.TESLA_LOCK_CAR)
+        if professor.is_near():
+            professor.unlock_tesla()
+            scheduler.enable_job(scheduler.schedule_Jobs.TESLA_LOCK_CAR)
+        else:
+            notification.send_push_notification("kick_off_ifttt_unlock_tesla::::: "
+                                                "Tesla unlock was disable! was triggered "
+                                                "while car was not near home")
+            logger.error("kick_off_ifttt_unlock_tesla ::::: Triggered while not at home. was ignored")
     except Exception as e:
         notification.send_push_notification('Faced issue  unlocking telsa' + str(e))
 
@@ -83,22 +89,21 @@ def tesla_automation():
     tesla_tap = tap.TAP()
     professor = Tesla()
     if tesla_tap.confirmation_before_armed():
-        g.db.set_door_open_status(garage.GarageOpenReason.DRIVE_AWAY)
-        g.db.set_door_close_status(garage.GarageCloseReason.DRIVE_AWAY)
-        g.db.set_tesla_location_is_home_value(False)
+        g.db.tap_set_flags_on()
         notification.send_push_notification('Trigger Tesla home automation!')
         logger.info('Trigger Tesla home automation!')
         tesla_tap.tesla_home_automation_engine()
     elif garage.garage_is_open():
-        notification.send_push_notification(' Garage door has been open for 5 mins. would your like to close, '
+        notification.send_push_notification(' Garage door has been open for a long time. Would your like to close, '
                                             'leave open or are you'
-                                            ' loading the bikes??')
-        g.db.set_ifttt_trigger_lock("False")
-        notification.send_push_notification('automation Done')
-    elif professor.is_on_home_street:
+                                            ' loading bikes??')
+        g.db.reset_all_flags_tap_is_complete()
+    elif professor.is_on_home_street():
         notification.send_push_notification('Still on Arcui ct')
-        notification.send_push_notification('automation Done')
-        g.db.set_ifttt_trigger_lock("False")
+        g.db.reset_all_flags_tap_is_complete()
+    else:
+        notification.send_push_notification("TAP should of been set!")
+        logger.error("tesla_automation::::: TAP should of been set!")
     tesla_tap.cleanup()
 
 

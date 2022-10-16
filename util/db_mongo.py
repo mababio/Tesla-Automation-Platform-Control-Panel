@@ -128,6 +128,14 @@ REMOVED
             notification.send_push_notification('door open flag was not set correctly. it has been now')
             self.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
 
+    def tap_set_flags_on(self):
+        if self.get_ifttt_trigger_lock() != "True":
+            self.set_ifttt_trigger_lock("True")
+        self.set_door_open_status(garage.GarageOpenReason.DRIVE_AWAY)
+        self.set_door_close_status(garage.GarageCloseReason.DRIVE_AWAY)
+        self.set_tesla_location_is_home_value(False)
+        self.reset_climate_automation()
+
 
 if __name__ == "__main__":
     obj = DBClient()

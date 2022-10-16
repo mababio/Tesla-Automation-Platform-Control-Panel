@@ -33,7 +33,7 @@ class Tesla:
             raise
 
     @retry(logger=logger, delay=10, tries=2, backoff=2)
-    def is_close(self):
+    def is_near(self):
         return_value = self.get_proximity()
         self.proximity_value = return_value['difference']
         if return_value['is_on_arcuri'] and return_value['is_close']:
@@ -96,7 +96,7 @@ class Tesla:
             raise
 
     def unlock_tesla(self):
-        if self.is_close() and not self.is_tesla_moving():
+        if not self.is_tesla_moving():
             try:
                 requests.post(settings['production']['URL']['tesla_unlock'], json={"desire_state": "unlock"})
                 chanify.send_push_notification("Tesla Unlocked")

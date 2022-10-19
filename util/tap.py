@@ -85,6 +85,7 @@ class TAP:
             notification.send_push_notification('tesla_home_automation_engine:::::: Issue found in the while loop '
                                                 + str(e))
             logger.error('tesla_home_automation_engine:::::: Issue found in the while loop ' + str(e))
+            self.db.set_ifttt_trigger_lock("False")
             raise
 
 

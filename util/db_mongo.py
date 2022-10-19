@@ -17,6 +17,10 @@ class DBClient:
         self.tesla_gps_save_mongodb_topic = self.publisher.topic_path(settings['production']['pub_sub']
                                                                       ['gps']['project'],
                                                                       settings['production']['pub_sub']['gps']['topic'])
+        self.tesla_validate_and_cleanup_topic = self.publisher.topic_path(settings['production']['pub_sub']
+                                                                          ['validate_cleanup']['project'],
+                                                                          settings['production']['pub_sub']
+                                                                          ['validate_cleanup']['topic'])
         try:
 REMOVED
             self.tesla_database = client['tesla']
@@ -96,7 +100,10 @@ REMOVED
             return self.publisher.publish(self.garage_control, 'open'.encode("utf-8"))
         else:
             notification.send_push_notification('Will not open garage because it appears it\'s open already')
-            logger.error('publish_open_garage::::: Will not open garage becuase it appears it\'s open already')
+            logger.error('publish_open_garage::::: Will not open garage because it appears it\'s open already')
+
+    def publish_validate_state_then_cleanup(self):
+        return self.publisher.publish(self.tesla_validate_and_cleanup_topic, 'validate'.encode("utf-8"))
 
     def publish_close_garage(self):
         if garage.garage_is_open():

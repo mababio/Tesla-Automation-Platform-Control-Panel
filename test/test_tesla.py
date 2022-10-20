@@ -30,7 +30,7 @@ def test_is_tesla_moving():
     assert type(obj.is_tesla_moving()) is bool
 
 
-def test_is_close():
+def test_is_near():
     assert type(obj.is_near()) is bool
     if not obj.is_near():
         assert db.get_door_close_status() == garage.GarageCloseReason.DRIVE_AWAY.value

@@ -23,6 +23,7 @@ class DBClient:
                                                                           ['validate_cleanup']['topic'])
         try:
 REMOVED
+REMOVED
             self.tesla_database = client['tesla']
         except Exception as e:
             logger.error("DBClient__init__::::: Issue with connecting to Mongodb: " + str(e))

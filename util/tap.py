@@ -74,8 +74,11 @@ class TAP:
                 elif self.tesla_obj.proximity_value < 10:
                     scheduler.schedule_proximity_job(10, self.db)
                     break
-                else:
+                elif self.tesla_obj.proximity_value < 12:
                     scheduler.schedule_proximity_job(15, self.db)
+                    break
+                else:
+                    scheduler.schedule_proximity_job(25, self.db)
                     break
             else:
                 self.safety = False  # To prevent the while from accidentally running again

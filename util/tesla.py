@@ -23,10 +23,13 @@ class Tesla:
         self.url_tesla_location = settings['production']['URL']['tesla_location']
         self.proximity_value = None
         self.db = db_mongo.DBClient()
+        self.sess = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(max_retries=20)
+        self.sess.mount('https://', adapter)
 
     def is_tesla_moving(self):
         try:
-            return False if requests.post(self.url_tesla_location).json()['speed'] is None else True
+            return False if self.sess.post(self.url_tesla_location).json()['speed'] is None else True
         except Exception as e:
             logger.error('is_tesla_moving:::: Issue with tesla location Google function ' + str(e))
             chanify.send_push_notification('is_tesla_moving:::: Issue with tesla location Google function ' + str(e))
@@ -47,7 +50,7 @@ class Tesla:
         param_prox = self.get_location()
         if isinstance(param_prox, dict):
             try:
-                return requests.post(self.url_tesla_prox, json=param_prox).json()
+                return self.sess.post(self.url_tesla_prox, json=param_prox).json()
             except Exception as e:
                 logger.error('get_proximity: tesla prox function error')
                 raise
@@ -57,7 +60,7 @@ class Tesla:
     #@retry(logger=logger, delay=10, tries=2, backoff=2)
     def get_location(self):
         try:
-            r_location = requests.get(self.url_tesla_location).json()
+            r_location = self.sess.get(self.url_tesla_location).json()
         except Exception as e:
             logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
             chanify.send_push_notification('Connection issue with' + self.url_tesla_location + ":" + str(e))
@@ -98,7 +101,7 @@ class Tesla:
     def unlock_tesla(self):
         if not self.is_tesla_moving():
             try:
-                requests.post(settings['production']['URL']['tesla_unlock'], json={"desire_state": "unlock"})
+                self.sess.post(settings['production']['URL']['tesla_unlock'], json={"desire_state": "unlock"})
                 chanify.send_push_notification("Tesla Unlocked")
             except Exception as e:
                 logger.error("unlock_tesla::::: Issue with http request to :::: " +
@@ -109,9 +112,9 @@ class Tesla:
 if __name__ == "__main__":
     obj = Tesla()
     obj.unlock_tesla()
-    # print(requests.get(settings['production']['URL']['tesla_info']).json()['vehicle_state']['is_user_present'])
+    # print(self.sess.get(settings['production']['URL']['tesla_info']).json()['vehicle_state']['is_user_present'])
    #  # # print(obj.is_battery_good()) and self.is_parked
    #  # param_prox={'lat':40.669900, 'lon': -74.095629}
    #  param_prox={'lat':40.663205, 'lon': -74.074595}
-   #  prox = requests.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
+   #  prox = self.sess.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
    #  print(prox)

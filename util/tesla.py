@@ -102,11 +102,11 @@ class Tesla:
     def unlock_tesla(self):
         if not self.is_tesla_moving():
             try:
-                self.sess.post(settings['production']['URL']['tesla_unlock'], json={"desire_state": "unlock"})
+                self.sess.post(settings['production']['URL']['tesla_control'], json={"command": "UNLOCK_CAR"})
                 chanify.send_push_notification("Tesla Unlocked")
             except Exception as e:
                 logger.error("unlock_tesla::::: Issue with http request to :::: " +
-                             settings['production']['URL']['tesla_unlock'] + str(e))
+                             settings['production']['URL']['tesla_control'] + str(e))
                 raise
 
 

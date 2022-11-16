@@ -43,7 +43,7 @@ steps:
       - services
       - add-iam-policy-binding
       - $_SERVICE_NAME
-      - '--member=allUsers '
+      - '--member=allUsers'
       - '--role=roles/run.invoker'
       - '--region=$_DEPLOY_REGION'
     id: Security

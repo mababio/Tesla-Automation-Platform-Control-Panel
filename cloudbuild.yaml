@@ -45,6 +45,7 @@ steps:
       - $_SERVICE_NAME
       - '--member=allUsers '
       - '--role=roles/run.invoker'
+      - '--region=$_DEPLOY_REGION'
     id: Security
     entrypoint: gcloud
 images:

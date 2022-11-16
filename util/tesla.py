@@ -65,14 +65,15 @@ class Tesla:
             logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
             chanify.send_push_notification('Connection issue with' + self.url_tesla_location + ":" + str(e))
             raise
-        try:
-            lat = float(r_location['lat'])
-            lon = float(r_location['lon'])
-            param_prox = {"lat": lat, "lon": lon}
-        except Exception as e:
-            logger.warning('get_location latlon= values are not valid:' + str(e))
-            chanify.send_push_notification('get_location latlon= values are not valid:' + str(e))
-            raise
+
+        if len(r_location) == 0:
+            logger.warning('get_location ::::: Tesla API is not providing Vehicle data right now')
+            chanify.send_push_notification('get_location ::::: Tesla API is not providing Vehicle data right now')
+            r_location = self.db.get_saved_location()
+
+        lat = float(r_location['lat'])
+        lon = float(r_location['lon'])
+        param_prox = {"lat": lat, "lon": lon}
         try:
             self.db.save_location(r_location)
         except Exception as e:

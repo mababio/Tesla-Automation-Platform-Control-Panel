@@ -56,12 +56,12 @@ class TAP:
     def tesla_home_automation_engine(self):
         try:
             while not self.tesla_obj.is_near() and self.safety:
-                if self.tesla_obj.proximity_value < .07:
-                    notification.send_push_notification("Delay for 1 secs close by")
-                    time.sleep(1)
-                elif self.tesla_obj.proximity_value < .3:
-                    notification.send_push_notification("Delay for 1 secs")
-                    time.sleep(1)
+                # if self.tesla_obj.proximity_value < .07:
+                #     notification.send_push_notification("Delay for 1 secs close by")
+                #     time.sleep(1)
+                if self.tesla_obj.proximity_value < .3:
+                    notification.send_push_notification("Delay for 2 secs")
+                    time.sleep(2)
                 elif self.tesla_obj.proximity_value < 1:
                     notification.send_push_notification("Delay for 15 sec")
                     time.sleep(15)

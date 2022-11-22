@@ -1,5 +1,4 @@
 from enum import Enum
-
 from google.cloud import scheduler_v1
 from google.protobuf import field_mask_pb2
 from config import settings

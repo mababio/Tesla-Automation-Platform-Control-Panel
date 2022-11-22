@@ -32,6 +32,5 @@ def send_push_notification( message):
     return publisher.publish(tesla_chanify_notification_topic, message.encode("utf-8"))
 
 
-
 if __name__ == "__main__":
     send_push_notification( 'testing')

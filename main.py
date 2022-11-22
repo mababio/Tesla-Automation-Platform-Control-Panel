@@ -1,10 +1,8 @@
 import os
-from flask import Flask
-from flask import g
+from flask import Flask, g
 from flask_executor import Executor
 from util.db_mongo import DBClient
-from util import tap
-from util import notification
+from util import tap, notification
 from util.logs import logger
 import util.garage as garage
 import util.gcp_scheduler as scheduler

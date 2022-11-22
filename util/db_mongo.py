@@ -1,8 +1,7 @@
 import json
 import pymongo
 from pymongo.server_api import ServerApi
-from util import notification
-from util import garage
+from util import notification, garage
 from util.logs import logger
 from google.cloud import pubsub_v1
 from config import settings

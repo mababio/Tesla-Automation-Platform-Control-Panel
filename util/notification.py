@@ -1,7 +1,7 @@
 from retry import retry
 from twilio.rest import Client
 from util.logs import logger
-from urllib import request, parse
+from google.cloud import pubsub_v1
 from config import settings
 
 
@@ -24,12 +24,13 @@ REMOVED
 
 
 @retry(logger=logger, delay=2, tries=2)
-def send_push_notification(message):
-    token = settings['production']['key']['chanify']
-    message_json = {'text': message}
-    data = parse.urlencode(message_json).encode()
-    req = request.Request("https://api.chanify.net/v1/sender/" + token, data=data)
-    request.urlopen(req)
+def send_push_notification( message):
+    publisher = pubsub_v1.PublisherClient()
+    tesla_chanify_notification_topic = publisher.topic_path(settings['production']['pub_sub']
+                                                                  ['chanify']['project'],
+                                                                  settings['production']['pub_sub']['chanify']['topic'])
+    return publisher.publish(tesla_chanify_notification_topic, message.encode("utf-8"))
+
 
 
 if __name__ == "__main__":

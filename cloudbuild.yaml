@@ -28,6 +28,7 @@ steps:
       - run
       - deploy
       - $_SERVICE_NAME
+      - '--no-cpu-throttling'
       - '--min-instances=1'
       - '--max-instances=2'
       - '--concurrency=2'

@@ -22,6 +22,7 @@ class DBClient:
                                                                           ['validate_cleanup']['topic'])
         try:
 REMOVED
+             client = pymongo.MongoClient(settings['production']['mongo_client_url']
 REMOVED
             self.tesla_database = client['tesla']
         except Exception as e:

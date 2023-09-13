@@ -12,8 +12,19 @@ app = Flask(__name__)
 executor = Executor(app)
 
 
+# TODO: It may be possible to remove IFFTT. Maybe put a listner in the raspi garage setup to always
+#  check the door status
+
+
+# TODO: Not sure if this is the most effient way to connect to DB.
+# Everytime a request is made, a new db connection is created
+
+
 @app.before_request
 def before_request():
+    """
+    logic ran before every HTTP requests. Logs issues when they occur and pushes notification
+    """
     try:
         g.db = DBClient()
     except Exception as e:
@@ -22,8 +33,15 @@ def before_request():
         raise
 
 
+# TODO: Maybe it makes sense that this route is called opened. b/c it's triggered when the garage is opened.
+#  does not open
+
 @app.route("/open")
 def kick_off_job_ifttt_open_bg():
+    """
+    Event driven function. called when garage door is opened. IFTTT will be triggered to call this function
+    :return: String status of function
+    """
     logger.info('kick_off_job_ifttt_open_bg: start of the /open flask route')
     if g.db.get_ifttt_trigger_lock() != 'False' or g.db.get_door_close_status() == 'DRIVE_AWAY':
         notification.send_push_notification("Process is already running")
@@ -34,8 +52,14 @@ def kick_off_job_ifttt_open_bg():
         return 'Scheduled a job'
 
 
+# TODO: Maybe it makes sense that this route is called closed. b/c it's trigger when the garage is closed.
+#  Does not closed
 @app.route("/close")
 def kick_off_job_ifttt_close_bg():
+    """
+    Event driven function. Called when garage door is closed. IFTTT will be triggered to call this function
+    :return: String status of function
+    """
     if g.db.get_door_open_status() == 'DRIVE_HOME':
         executor.submit(garage_door_closed)
         notification.send_push_notification('Car has arrive and door was closed')
@@ -46,8 +70,15 @@ def kick_off_job_ifttt_close_bg():
         return 'Garage Door closed'
 
 
+
+# TODO: don't clearly see the differency implementation wise between long term kick off and kick_off_job_ifttt_open_bg
 @app.route("/long_term")
 def kick_off_job_long_term_bg():
+    """
+    Event Driven function. Fast track way to trigger tesla automation engine for when the car is far away
+
+    :return: String function status
+    """
     logger.info('kick_off_job_long_term_bg::::: Kicking off :::::')
     if g.db.get_door_open_status() == 'DRIVE_AWAY' and g.db.get_ifttt_trigger_lock() != "True":
         g.db.set_ifttt_trigger_lock("True")
@@ -64,27 +95,19 @@ def kick_off_job_long_term_bg():
         return 'kick_off_job_long_term_bg::::: Appears car is home and this function should not run'
 
 
-@app.route("/ifttt_unlock_tesla")
-def kick_off_ifttt_unlock_tesla():
-    try:
-        professor = Tesla()
-        if professor.is_near():
-            professor.unlock_tesla()
-            scheduler.enable_job(scheduler.schedule_Jobs.TESLA_LOCK_CAR)
-        else:
-            notification.send_push_notification("kick_off_ifttt_unlock_tesla::::: "
-                                                "Tesla unlock was disable! was triggered "
-                                                "while car was not near home")
-            logger.error("kick_off_ifttt_unlock_tesla ::::: Triggered while not at home. was ignored")
-    except Exception as e:
-        notification.send_push_notification('Faced issue  unlocking telsa' + str(e))
-
 
 def garage_door_closed():
+    """
+    Clean up function. Function that runs when car returns home and garage door closes
+    """
     g.db.reset_all_flags_tap_is_complete()
 
 
+# TODO: update push notification where Arcui is mentioned. parametize on that
 def tesla_automation():
+    """
+    Main Entry way into tesla home automation engine.
+    """
     tesla_tap = tap.TAP()
     professor = Tesla()
     if tesla_tap.confirmation_before_armed():

@@ -45,7 +45,7 @@ class Tesla:
         else:
             return False
 
-    #@retry(logger=logger, delay=10, tries=2, backoff=2)
+    # @retry(logger=logger, delay=10, tries=2, backoff=2)
     def get_proximity(self):
         param_prox = self.get_location()
         if isinstance(param_prox, dict):
@@ -57,7 +57,7 @@ class Tesla:
         else:
             raise TypeError('get_location GCP function return something other than dict')
 
-    #@retry(logger=logger, delay=10, tries=2, backoff=2)
+    # @retry(logger=logger, delay=10, tries=2, backoff=2)
     def get_location(self):
         try:
             r_location = self.sess.get(self.url_tesla_location).json()
@@ -114,8 +114,8 @@ if __name__ == "__main__":
     obj = Tesla()
     obj.unlock_tesla()
     # print(self.sess.get(settings['production']['URL']['tesla_info']).json()['vehicle_state']['is_user_present'])
-   #  # # print(obj.is_battery_good()) and self.is_parked
-   #  # param_prox={'lat':40.669900, 'lon': -74.095629}
-   #  param_prox={'lat':40.663205, 'lon': -74.074595}
-   #  prox = self.sess.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
-   #  print(prox)
+#  # # print(obj.is_battery_good()) and self.is_parked
+#  # param_prox={'lat':40.669900, 'lon': -74.095629}
+#  param_prox={'lat':40.663205, 'lon': -74.074595}
+#  prox = self.sess.post('https://us-east4-ensure-dev-zone.cloudfunctions.net/function-tesla-prox', json=param_prox).json()
+#  print(prox)

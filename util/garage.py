@@ -16,7 +16,7 @@ class GarageOpenReason(Enum):
     DRIVE_AWAY = 'DRIVE_AWAY'
     NOT_SURE = 'NOT_SURE'
 
-
+# TODO: May be moving away from myq api soon
 def garage_is_open():
     return False if requests.post(settings['production']['URL']['myq_garage'], json={"isopen": ''}).json()['isopen'] \
                     == 'closed' else True

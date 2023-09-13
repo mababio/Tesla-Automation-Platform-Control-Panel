@@ -10,14 +10,21 @@ client = scheduler_v1.CloudSchedulerClient()
 
 class schedule_Jobs(Enum):
     TESLA_LONG_TERM = settings['production']['scheduler_job']['tesla_long_term']
-    TESLA_LOCK_CAR = settings['production']['scheduler_job']['tesla_lock_car']
 
 
 def get_cron_format(mins):
     return '*/{mins} * * * *'.format(mins=mins)
 
 
+# TODO: the second param could be rmeoved. the second param is the db util class. it's needed to set trigger to False.
+#  This signifies that the system is free to take on other requests. But this could be done more elegatly.
 def schedule_proximity_job(delay_minutes, db):
+    """
+    Function that schedules a HTTP request for car proximity
+    :param delay_minutes: how far into the future do you want to run a proximity checker on the car
+    :param db: DB object used to set trigger state
+    :return: GCP job object
+    """
     notification.send_push_notification("Delay for {} minutes".format(delay_minutes))
     job = scheduler_v1.Job()
     job.name = settings['production']['scheduler_job']['tesla_long_term']
@@ -33,7 +40,7 @@ def schedule_proximity_job(delay_minutes, db):
 
 def pause_job(job):
     if isinstance(job, schedule_Jobs):
-        request = scheduler_v1.PauseJobRequest(name=job.value,)
+        request = scheduler_v1.PauseJobRequest(name=job.value, )
         job = client.pause_job(request=request)
         return True if job.state is job.State.PAUSED else False
     else:
@@ -43,7 +50,7 @@ def pause_job(job):
 
 def enable_job(job):
     if isinstance(job, schedule_Jobs):
-        request = scheduler_v1.ResumeJobRequest(name=job.value,)
+        request = scheduler_v1.ResumeJobRequest(name=job.value, )
         return client.resume_job(request=request)
     else:
         logger.error('disable_job::::: Issue with input given')
@@ -51,4 +58,4 @@ def enable_job(job):
 
 
 if __name__ == "__main__":
-    enable_job(schedule_Jobs.TESLA_LOCK_CAR)
+    enable_job(schedule_Jobs.TESLA_LONG_TERM)

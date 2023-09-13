@@ -25,7 +25,6 @@ class DBClient:
                                                                           ['validate_cleanup']['topic'])
         try:
             client = pymongo.MongoClient(settings['production']['database']['mongo']['mongo_client_url']
-                                         # , username='mababio', password='mongodb', server_api=ServerApi('1'))
                                          , username=settings['production']['database']['mongo']['username'], password=settings['production']['database']['mongo']['password'], server_api=ServerApi('1'))
             self.tesla_database = client['tesla']
         except Exception as e:

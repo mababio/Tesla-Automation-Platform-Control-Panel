@@ -7,12 +7,15 @@ from google.cloud import pubsub_v1
 from config import settings
 
 
+# TODO: I don't think this db client object is centralized. check and if not make it centralized
+
+# TODO: Check if mongodb is was and is still the best option
 class DBClient:
 
     def __init__(self):
         self.publisher = pubsub_v1.PublisherClient()
         self.garage_control = self.publisher.topic_path(settings['production']['pub_sub']['garage']['project']
-                                                        ,settings['production']['pub_sub']['garage']['topic'])
+                                                        , settings['production']['pub_sub']['garage']['topic'])
         self.tesla_gps_save_mongodb_topic = self.publisher.topic_path(settings['production']['pub_sub']
                                                                       ['gps']['project'],
                                                                       settings['production']['pub_sub']['gps']['topic'])
@@ -21,8 +24,9 @@ class DBClient:
                                                                           settings['production']['pub_sub']
                                                                           ['validate_cleanup']['topic'])
         try:
-            client = pymongo.MongoClient(settings['production']['mongo_client_url']
-REMOVED
+            client = pymongo.MongoClient(settings['production']['database']['mongo']['mongo_client_url']
+                                         # , username='mababio', password='mongodb', server_api=ServerApi('1'))
+                                         , username=settings['production']['database']['mongo']['username'], password=settings['production']['database']['mongo']['password'], server_api=ServerApi('1'))
             self.tesla_database = client['tesla']
         except Exception as e:
             logger.error("DBClient__init__::::: Issue with connecting to Mongodb: " + str(e))
@@ -42,7 +46,9 @@ REMOVED
         myquery = {"_id": "current"}
         new_values = {"$set": {"is_home": bol_value}}
         self.tesla_database['tesla_location'].update_one(myquery, new_values)
-        logger.debug('set_tesla_location_is_home_value::::: this was trigger most likely b/c we have reached home' + str(bol_value))
+        logger.debug(
+            'set_tesla_location_is_home_value::::: this was trigger most likely b/c we have reached home' + str(
+                bol_value))
 
     def set_ifttt_trigger_lock(self, bol_val):
         myquery = {"_id": "IFTTT_TRIGGER_LOCK"}

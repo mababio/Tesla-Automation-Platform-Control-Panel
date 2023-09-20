@@ -3,7 +3,9 @@ import requests
 from config import settings
 from paho.mqtt import client as mqtt_client
 import random
-
+import asyncio
+from aiohttp import ClientSession
+import pymyq
 from util.logs import logger
 from util.notification import send_push_notification
 
@@ -29,6 +31,14 @@ username = settings['mqtt']['username']
 password = settings['mqtt']['password']
 
 
+async def get_garage_state() -> None:
+    """Create the aiohttp session and run."""
+    async with ClientSession() as websession:
+REMOVED
+        devices = myq.covers
+        return devices['CG085035767B'].state
+
+
 def connect_mqtt():
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
@@ -48,19 +58,32 @@ def connect_mqtt():
 
 # TODO: May be moving away from myq api soon
 def garage_is_open():
-    return False if requests.post(settings['production']['URL']['myq_garage'], json={"isopen": ''}).json()['isopen'] \
-                    == 'closed' else True
+    garage_state = asyncio.get_event_loop().run_until_complete(get_garage_state())
+    return False if garage_state == 'closed' else True
 
 
 def request_open():
-    client = connect_mqtt()
-    client.loop_start()
-    client.publish(topic, "open")
-    client.loop_stop()
+    if garage_is_open():
+        logger.info("Garage is open already! request to open has been ignored")
+        return False
+    else:
+        logger.info("Opening Garage!")
+        client = connect_mqtt()
+        client.loop_start()
+        client.publish(topic, "open")
+        client.loop_stop()
 
 
 def request_close():
-    client = connect_mqtt()
-    client.loop_start()
-    client.publish(topic, "closed")
-    client.loop_stop()
+    if not garage_is_open():
+        logger.info("Garage is closed already! Request to closed has been ignored")
+    else:
+        logger.info("Closing Garage!")
+        client = connect_mqtt()
+        client.loop_start()
+        client.publish(topic, "closed")
+        client.loop_stop()
+
+
+if __name__ == "__main__":
+    print(" ")

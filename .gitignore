@@ -8,3 +8,4 @@ settings.toml
 # Ignore dynaconf secret files
 .secrets.*
 .env
+server-ca.crt

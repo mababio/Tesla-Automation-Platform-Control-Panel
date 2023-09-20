@@ -5,8 +5,15 @@ steps:
 
   - name: python
     entrypoint: python
-    args: [ "load_settings.py", download , $PROJECT_NUMBER ]
+#    args: [ "load_settings.py", download , $PROJECT_NUMBER ]
+    args: [ "secret_manager.py", download , "settings.toml", tap_settings_files, $PROJECT_NUMBER ]
     id: load_settings_toml
+
+  - name: python
+    entrypoint: python
+    args: [ "secret_manager.py", download , "util/server-ca.crt", mqtt_ca_crt, $PROJECT_NUMBER ]
+#    args: [ "server-ca.crt", download , $PROJECT_NUMBER ]
+    id: MQTT_ca_crt
 
   - name: gcr.io/cloud-builders/docker
     args:

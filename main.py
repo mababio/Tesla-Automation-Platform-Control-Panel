@@ -46,6 +46,7 @@ def kick_off_job_ifttt_open_bg():
     else:
         g.db.set_ifttt_trigger_lock("True")
         executor.submit(tesla_automation)
+        notification.send_push_notification("Scheduled a job")
         return 'Scheduled a job'
 
 
@@ -101,8 +102,10 @@ def tesla_automation():
     """
     Main Entry way into tesla home automation engine.
     """
+    notification.send_push_notification('1!')
     tesla_tap = tap.TAP()
     professor = Tesla()
+    notification.send_push_notification('2!')
     if tesla_tap.confirmation_before_armed():
         g.db.tap_set_flags_on()
         notification.send_push_notification('Trigger Tesla home automation!')

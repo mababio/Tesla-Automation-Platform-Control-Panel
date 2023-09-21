@@ -29,6 +29,8 @@ topic = "garage/command"
 client_id = f'garage-Tesla-Automation-Platform-{random.randint(0, 100)}'
 username = settings['mqtt']['username']
 password = settings['mqtt']['password']
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 
 
 async def get_garage_state() -> None:
@@ -86,4 +88,4 @@ def request_close():
 
 
 if __name__ == "__main__":
-    print(" ")
+    print(garage_is_open())

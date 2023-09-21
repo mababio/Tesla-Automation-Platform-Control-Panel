@@ -2,6 +2,7 @@ import requests
 from retry import retry
 import googlemaps
 import util.db_mongo as db_mongo
+# from  util import db_mongo
 from util.logs import logger
 import util.notification as chanify
 from enum import Enum
@@ -112,7 +113,7 @@ class Tesla:
 
 if __name__ == "__main__":
     obj = Tesla()
-    obj.unlock_tesla()
+    print(obj.is_near())
     # print(self.sess.get(settings['production']['URL']['tesla_info']).json()['vehicle_state']['is_user_present'])
 #  # # print(obj.is_battery_good()) and self.is_parked
 #  # param_prox={'lat':40.669900, 'lon': -74.095629}

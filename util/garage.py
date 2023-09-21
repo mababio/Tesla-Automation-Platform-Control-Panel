@@ -29,6 +29,7 @@ topic = "garage/command"
 client_id = f'garage-Tesla-Automation-Platform-{random.randint(0, 100)}'
 username = settings['mqtt']['username']
 password = settings['mqtt']['password']
+
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
@@ -61,7 +62,8 @@ def connect_mqtt():
 # TODO: May be moving away from myq api soon
 def garage_is_open():
     send_push_notification('gg!')
-    garage_state = asyncio.get_running_loop().run_until_complete(get_garage_state())
+    # garage_state = asyncio.get_running_loop().run_until_complete(get_garage_state())
+    garage_state = asyncio.run(get_garage_state())
     return False if garage_state == 'closed' else True
 
 

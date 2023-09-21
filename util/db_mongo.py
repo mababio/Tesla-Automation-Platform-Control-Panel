@@ -14,8 +14,6 @@ class DBClient:
 
     def __init__(self):
         self.publisher = pubsub_v1.PublisherClient()
-        self.garage_control = self.publisher.topic_path(settings['production']['pub_sub']['garage']['project']
-                                                        , settings['production']['pub_sub']['garage']['topic'])
         self.tesla_gps_save_mongodb_topic = self.publisher.topic_path(settings['production']['pub_sub']
                                                                       ['gps']['project'],
                                                                       settings['production']['pub_sub']['gps']['topic'])
@@ -25,7 +23,9 @@ class DBClient:
                                                                           ['validate_cleanup']['topic'])
         try:
             client = pymongo.MongoClient(settings['production']['database']['mongo']['mongo_client_url']
-                                         , username=settings['production']['database']['mongo']['username'], password=settings['production']['database']['mongo']['password'], server_api=ServerApi('1'))
+                                         , username=settings['production']['database']['mongo']['username'],
+                                         password=settings['production']['database']['mongo']['password'],
+                                         server_api=ServerApi('1'))
             self.tesla_database = client['tesla']
         except Exception as e:
             logger.error("DBClient__init__::::: Issue with connecting to Mongodb: " + str(e))
@@ -100,22 +100,8 @@ class DBClient:
         logger.info('save_location::::: sent latlon to pubsub')
         return future
 
-    def publish_open_garage(self):
-        if not garage.garage_is_open():
-            return self.publisher.publish(self.garage_control, 'open'.encode("utf-8"))
-        else:
-            notification.send_push_notification('Will not open garage because it appears it\'s open already')
-            logger.error('publish_open_garage::::: Will not open garage because it appears it\'s open already')
-
     def publish_validate_state_then_cleanup(self):
         return self.publisher.publish(self.tesla_validate_and_cleanup_topic, 'validate'.encode("utf-8"))
-
-    def publish_close_garage(self):
-        if garage.garage_is_open():
-            return self.publisher.publish(self.garage_control, 'close'.encode("utf-8"))
-        else:
-            notification.send_push_notification('Will not open garage because it appears it\'s open already')
-            logger.error('publish_open_garage::::: Will not open garage becuase it appears it\'s open already')
 
     def is_climate_turned_on_via_automation(self):
         climate_state = self.tesla_database['tesla_climate_status'].find_one({'_id': 'enum'})['climate_state']

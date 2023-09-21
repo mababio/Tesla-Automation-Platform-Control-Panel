@@ -38,7 +38,8 @@ class TAP:
                     return False
 
     def trigger_tesla_home_automation(self):
-        self.db.publish_open_garage()
+        # self.db.publish_open_garage()
+        garage.request_open()
         self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')

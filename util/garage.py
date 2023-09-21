@@ -60,7 +60,7 @@ def connect_mqtt():
 
 # TODO: May be moving away from myq api soon
 def garage_is_open():
-    send_push_notification.send_push_notification('gg!')
+    send_push_notification('gg!')
     garage_state = asyncio.get_event_loop().run_until_complete(get_garage_state())
     return False if garage_state == 'closed' else True
 

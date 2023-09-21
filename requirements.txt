@@ -20,4 +20,5 @@ google-cloud-secret-manager==2.12.6
 asyncio
 aiohttp==3.8.5
 pymyq==3.1.6
+paho.mqtt==1.6.1
 

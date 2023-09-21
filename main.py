@@ -33,10 +33,7 @@ def before_request():
         raise
 
 
-# TODO: Maybe it makes sense that this route is called opened. b/c it's triggered when the garage is opened.
-#  does not open
-
-@app.route("/open")
+@app.route("/opened")
 def kick_off_job_ifttt_open_bg():
     """
     Event driven function. called when garage door is opened. IFTTT will be triggered to call this function
@@ -52,9 +49,7 @@ def kick_off_job_ifttt_open_bg():
         return 'Scheduled a job'
 
 
-# TODO: Maybe it makes sense that this route is called closed. b/c it's trigger when the garage is closed.
-#  Does not closed
-@app.route("/close")
+@app.route("/closed")
 def kick_off_job_ifttt_close_bg():
     """
     Event driven function. Called when garage door is closed. IFTTT will be triggered to call this function
@@ -68,7 +63,6 @@ def kick_off_job_ifttt_close_bg():
         notification.send_push_notification('Garage Door closed')
         g.db.publish_validate_state_then_cleanup()
         return 'Garage Door closed'
-
 
 
 # TODO: don't clearly see the differency implementation wise between long term kick off and kick_off_job_ifttt_open_bg
@@ -93,7 +87,6 @@ def kick_off_job_long_term_bg():
         scheduler.pause_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
 
         return 'kick_off_job_long_term_bg::::: Appears car is home and this function should not run'
-
 
 
 def garage_door_closed():

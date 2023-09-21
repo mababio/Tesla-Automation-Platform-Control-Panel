@@ -70,7 +70,7 @@ def request_open():
         logger.info("Opening Garage!")
         client = connect_mqtt()
         client.loop_start()
-        client.publish(topic, "open")
+        # client.publish(topic, "open")
         client.loop_stop()
 
 
@@ -81,7 +81,7 @@ def request_close():
         logger.info("Closing Garage!")
         client = connect_mqtt()
         client.loop_start()
-        client.publish(topic, "closed")
+        # client.publish(topic, "closed")
         client.loop_stop()
 
 

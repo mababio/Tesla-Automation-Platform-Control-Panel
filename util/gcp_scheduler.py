@@ -18,6 +18,7 @@ def get_cron_format(mins):
 
 # TODO: the second param could be rmeoved. the second param is the db util class. it's needed to set trigger to False.
 #  This signifies that the system is free to take on other requests. But this could be done more elegatly.
+# TODO: Find a more open source approach to GCP scheduler
 def schedule_proximity_job(delay_minutes, db):
     """
     Function that schedules a HTTP request for car proximity

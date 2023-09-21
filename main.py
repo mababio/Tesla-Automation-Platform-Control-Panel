@@ -102,29 +102,22 @@ def tesla_automation():
     """
     Main Entry way into tesla home automation engine.
     """
-    notification.send_push_notification('1!')
     tesla_tap = tap.TAP()
     professor = Tesla()
-    notification.send_push_notification('2!')
     if tesla_tap.confirmation_before_armed():
-        notification.send_push_notification('9!')
         g.db.tap_set_flags_on()
-        notification.send_push_notification('10!')
         notification.send_push_notification('Trigger Tesla home automation!')
         logger.info('Trigger Tesla home automation!')
         tesla_tap.tesla_home_automation_engine()
     elif garage.garage_is_open():
-        notification.send_push_notification('11!')
         notification.send_push_notification(' Garage door has been open for a long time. Would your like to close, '
                                             'leave open or are you'
                                             ' loading bikes??')
         g.db.reset_all_flags_tap_is_complete()
     elif professor.is_on_home_street():
-        notification.send_push_notification('12!')
         notification.send_push_notification('Still on Arcui ct')
         g.db.reset_all_flags_tap_is_complete()
     else:
-        notification.send_push_notification('13!')
         notification.send_push_notification("TAP should of been set!")
         logger.error("tesla_automation::::: TAP should of been set!")
     tesla_tap.cleanup()

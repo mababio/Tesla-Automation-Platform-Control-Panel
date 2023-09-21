@@ -30,14 +30,12 @@ client_id = f'garage-Tesla-Automation-Platform-{random.randint(0, 100)}'
 username = settings['mqtt']['username']
 password = settings['mqtt']['password']
 
-# loop = asyncio.new_event_loop()
-# asyncio.set_event_loop(loop)
-
 
 async def get_garage_state() -> None:
     """Create the aiohttp session and run."""
     async with ClientSession() as websession:
-REMOVED
+        myq = await pymyq.login(settings['garage']['username'], settings['garage']['password'], websession)
+
         devices = myq.covers
         return devices['CG085035767B'].state
 

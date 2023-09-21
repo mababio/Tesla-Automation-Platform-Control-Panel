@@ -20,27 +20,21 @@ class TAP:
         self.safety = True
 
     def confirmation_before_armed(self):
-        notification.send_push_notification('3!')
         while garage.garage_is_open() and not self.garage_open_limit == 0:
-            notification.send_push_notification('4!')
             notification.send_push_notification('Garage is open for {} seconds remaining to confirm closure'
                                                 .format(str(self.garage_open_limit)))
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
             while self.tesla_obj.is_on_home_street() and not self.confirmation_limit == 0:
-                notification.send_push_notification('5!')
                 notification.send_push_notification('Waiting {} seconds for conditions to be met for trigger'
                                                     .format(str(self.confirmation_limit)))
                 time.sleep(5)
                 self.confirmation_limit -= 5
             else:
-                notification.send_push_notification('6!')
                 if not garage.garage_is_open() and not self.tesla_obj.is_on_home_street():
-                    notification.send_push_notification('7!')
                     return True
                 else:
-                    notification.send_push_notification('8!')
                     return False
 
     def trigger_tesla_home_automation(self):

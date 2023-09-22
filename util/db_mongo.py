@@ -1,7 +1,7 @@
 import json
 import pymongo
 from pymongo.server_api import ServerApi
-from util import notification, garage
+from util import notification, garage, tesla
 from util.logs import logger
 from google.cloud import pubsub_v1
 from config import settings
@@ -14,6 +14,7 @@ class DBClient:
 
     def __init__(self):
         self.publisher = pubsub_v1.PublisherClient()
+        self.tesla_obj = tesla.Tesla()
         self.tesla_gps_save_mongodb_topic = self.publisher.topic_path(settings['production']['pub_sub']
                                                                       ['gps']['project'],
                                                                       settings['production']['pub_sub']['gps']['topic'])
@@ -100,8 +101,17 @@ class DBClient:
         logger.info('save_location::::: sent latlon to pubsub')
         return future
 
-    def publish_validate_state_then_cleanup(self):
-        return self.publisher.publish(self.tesla_validate_and_cleanup_topic, 'validate'.encode("utf-8"))
+    def validate_state_then_cleanup(self):
+        if not self.tesla_obj.is_near() and (self.get_door_open_status() == 'DRIVE_HOME' or
+                                             self.get_door_close_status() == 'DRIVE_HOME'):
+            self.set_door_open_status(garage.GarageOpenReason.DRIVE_AWAY)
+            self.set_door_close_status(garage.GarageCloseReason.DRIVE_AWAY)
+            self.set_ifttt_trigger_lock("False")
+        elif self.tesla_obj.is_near() and (self.get_door_open_status() == 'DRIVE_AWAY' or
+                                           self.get_door_close_status() == 'DRIVE_AWAY'):
+            self.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
+            self.set_door_close_status(garage.GarageCloseReason.DRIVE_HOME)
+            self.set_ifttt_trigger_lock("False")
 
     def is_climate_turned_on_via_automation(self):
         climate_state = self.tesla_database['tesla_climate_status'].find_one({'_id': 'enum'})['climate_state']

@@ -62,7 +62,7 @@ def kick_off_job_ifttt_close_bg():
         return 'Car has arrive and door was closed'
     else:
         notification.send_push_notification('Garage Door closed')
-        g.db.validate_state_then_cleanup()
+        g.db.validate_state_then_cleanup(Tesla)
         return 'Garage Door closed'
 
 

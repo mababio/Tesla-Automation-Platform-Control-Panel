@@ -14,7 +14,7 @@ class DBClient:
 
     def __init__(self):
         self.publisher = pubsub_v1.PublisherClient()
-        self.tesla_obj = tesla.Tesla()
+        # self.tesla_obj = tesla.Tesla()
         self.tesla_gps_save_mongodb_topic = self.publisher.topic_path(settings['production']['pub_sub']
                                                                       ['gps']['project'],
                                                                       settings['production']['pub_sub']['gps']['topic'])
@@ -101,7 +101,7 @@ class DBClient:
         logger.info('save_location::::: sent latlon to pubsub')
         return future
 
-    def validate_state_then_cleanup(self):
+    def validate_state_then_cleanup(self,tesla_obj):
         if not self.tesla_obj.is_near() and (self.get_door_open_status() == 'DRIVE_HOME' or
                                              self.get_door_close_status() == 'DRIVE_HOME'):
             self.set_door_open_status(garage.GarageOpenReason.DRIVE_AWAY)

@@ -58,7 +58,7 @@ class Tesla:
         else:
             raise TypeError('get_location GCP function return something other than dict')
 
-    # @retry(logger=logger, delay=10, tries=2, backoff=2)
+    @retry(logger=logger.error("GET_LOCATION FAILED: RERUNNING"), delay=10, tries=10, backoff=2)
     def get_location(self):
         try:
             r_location = self.sess.get(self.url_tesla_location).json()

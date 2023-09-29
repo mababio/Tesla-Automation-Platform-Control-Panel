@@ -59,7 +59,7 @@ def connect_mqtt():
 
 # TODO: May be moving away from myq api soon
 def garage_is_open():
-    send_push_notification('gg!')
+    send_push_notification('Checking if garage door is open')
     garage_state = asyncio.run(get_garage_state())
     return False if garage_state == 'closed' else True
 
@@ -67,9 +67,11 @@ def garage_is_open():
 def request_open():
     if garage_is_open():
         logger.info("Garage is open already! request to open has been ignored")
+        send_push_notification('Garage is open already! request to open has been ignored')
         return False
     else:
         logger.info("Opening Garage!")
+        send_push_notification('Opening Garage!')
         client = connect_mqtt()
         client.loop_start()
         # client.publish(topic, "open")
@@ -79,6 +81,7 @@ def request_open():
 def request_close():
     if not garage_is_open():
         logger.info("Garage is closed already! Request to closed has been ignored")
+        send_push_notification('Garage is closed already! request to closed has been ignored')
     else:
         logger.info("Closing Garage!")
         client = connect_mqtt()

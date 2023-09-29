@@ -40,7 +40,9 @@ class TAP:
     def trigger_tesla_home_automation(self):
         # self.db.publish_open_garage()
         garage.request_open()
+        notification.send_push_notification('mababio!!!!')
         self.db.set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
+        notification.send_push_notification('mababio!!!!!!!!!')
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
         job = scheduler.pause_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
@@ -95,7 +97,7 @@ class TAP:
 
 if __name__ == "__main__":
     obj = TAP()
-    print(garage.garage_is_open())
+    print(obj.tesla_home_automation_engine())
     # print(obj.tesla_obj.is_close())
 
     # obj.tesla_obj.get_location()

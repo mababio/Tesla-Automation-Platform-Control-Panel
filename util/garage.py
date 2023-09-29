@@ -41,9 +41,11 @@ async def get_garage_state() -> None:
 
 
 def connect_mqtt():
+    send_push_notification('TESTING 1')
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
             print("Connected to MQTT Broker!")
+            send_push_notification("Connected to MQTT Broker!")
             logger.info("MQTT Connected")
         else:
             print("Failed to connect, return code %d\n", rc)
@@ -73,9 +75,12 @@ def request_open():
         logger.info("Opening Garage!")
         send_push_notification('Opening Garage!')
         client = connect_mqtt()
+        send_push_notification('Opening Garage!!!')
         client.loop_start()
+        send_push_notification('Opening Garage!!!!!!')
         # client.publish(topic, "open")
         client.loop_stop()
+        send_push_notification('Opening Garage!!!!!!!!!!')
 
 
 def request_close():

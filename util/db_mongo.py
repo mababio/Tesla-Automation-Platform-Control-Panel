@@ -67,11 +67,15 @@ class DBClient:
             raise TypeError('set_door_close_status::::: GarageCloseReason Enum type was not provided')
 
     def set_door_open_status(self, reason):
+        notification.send_push_notification("HER!!!!")
         if isinstance(reason, garage.GarageOpenReason):
+            notification.send_push_notification("HER!!!!333")
             myquery = {"_id": "garage"}
             new_values = {"$set": {"opened_reason": reason.value}}
             self.tesla_database['garage'].update_one(myquery, new_values)
+            notification.send_push_notification("HER!!!!4444")
             logger.debug('set_door_open_status::::: Updating door_open_status value to' + str(reason))
+            notification.send_push_notification('set_door_open_status::::: Updating door_open_status value to' + str(reason))
         else:
             logger.error('set_door_open_status::::: Issue with input given')
             raise TypeError('set_door_open_status::::: GarageOpenReason Enum type was not provided')

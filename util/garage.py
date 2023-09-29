@@ -80,13 +80,13 @@ def request_open():
     else:
         logger.info("Opening Garage!")
         send_push_notification('Opening Garage!')
-        client = connect_mqtt()
-        send_push_notification('Opening Garage!!!')
-        client.loop_start()
-        send_push_notification('Opening Garage!!!!!!')
-        # client.publish(topic, "open")
-        client.loop_stop()
-        send_push_notification('Opening Garage!!!!!!!!!!')
+        # client = connect_mqtt()
+        # send_push_notification('Opening Garage!!!')
+        # client.loop_start()
+        # send_push_notification('Opening Garage!!!!!!')
+        # # client.publish(topic, "open")
+        # client.loop_stop()
+        # send_push_notification('Opening Garage!!!!!!!!!!')
 
 
 def request_close():
@@ -95,10 +95,10 @@ def request_close():
         send_push_notification('Garage is closed already! request to closed has been ignored')
     else:
         logger.info("Closing Garage!")
-        client = connect_mqtt()
-        client.loop_start()
-        # client.publish(topic, "closed")
-        client.loop_stop()
+        # client = connect_mqtt()
+        # client.loop_start()
+        # # client.publish(topic, "closed")
+        # client.loop_stop()
 
 
 if __name__ == "__main__":

@@ -41,28 +41,31 @@ async def get_garage_state() -> None:
 
 
 def connect_mqtt():
-    send_push_notification('TESTING 1')
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print("Connected to MQTT Broker!")
-            send_push_notification("Connected to MQTT Broker!")
-            logger.info("MQTT Connected")
-        else:
-            print("Failed to connect, return code %d\n", rc)
-            logger.error("Failed to connect to MQTT")
+    try:
+        send_push_notification('TESTING 1')
+        def on_connect(client, userdata, flags, rc):
+            if rc == 0:
+                print("Connected to MQTT Broker!")
+                send_push_notification("Connected to MQTT Broker!")
+                logger.info("MQTT Connected")
+            else:
+                print("Failed to connect, return code %d\n", rc)
+                logger.error("Failed to connect to MQTT")
 
-    send_push_notification('TESTING 111')
-    client = mqtt_client.Client(client_id)
-    send_push_notification('TESTING 1113')
-    client.tls_set(ca_certs='./server-ca.crt')
-    send_push_notification('TESTING 1114')
-    client.username_pw_set(username, password)
-    send_push_notification('TESTING 1115')
-    client.on_connect = on_connect
-    send_push_notification('TESTING 1116')
-    client.connect(broker, port)
-    send_push_notification('TESTING 1117')
-    return client
+        send_push_notification('TESTING 111')
+        client = mqtt_client.Client(client_id)
+        send_push_notification('TESTING 1113')
+        client.tls_set(ca_certs='server-ca.crt')
+        send_push_notification('TESTING 1114')
+        client.username_pw_set(username, password)
+        send_push_notification('TESTING 1115')
+        client.on_connect = on_connect
+        send_push_notification('TESTING 1116')
+        client.connect(broker, port)
+        send_push_notification('TESTING 1117')
+        return client
+    except Exception as e:
+        send_push_notification("Getting error connecting to MQTT: {}".format(str(e)))
 
 
 # TODO: May be moving away from myq api soon
@@ -80,13 +83,13 @@ def request_open():
     else:
         logger.info("Opening Garage!")
         send_push_notification('Opening Garage!')
-        # client = connect_mqtt()
-        # send_push_notification('Opening Garage!!!')
-        # client.loop_start()
-        # send_push_notification('Opening Garage!!!!!!')
-        # # client.publish(topic, "open")
-        # client.loop_stop()
-        # send_push_notification('Opening Garage!!!!!!!!!!')
+        client = connect_mqtt()
+        send_push_notification('Opening Garage!!!')
+        client.loop_start()
+        send_push_notification('Opening Garage!!!!!!')
+        # client.publish(topic, "open")
+        client.loop_stop()
+        send_push_notification('Opening Garage!!!!!!!!!!')
 
 
 def request_close():
@@ -95,10 +98,10 @@ def request_close():
         send_push_notification('Garage is closed already! request to closed has been ignored')
     else:
         logger.info("Closing Garage!")
-        # client = connect_mqtt()
-        # client.loop_start()
-        # # client.publish(topic, "closed")
-        # client.loop_stop()
+        client = connect_mqtt()
+        client.loop_start()
+        # client.publish(topic, "closed")
+        client.loop_stop()
 
 
 if __name__ == "__main__":

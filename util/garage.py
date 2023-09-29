@@ -51,11 +51,17 @@ def connect_mqtt():
             print("Failed to connect, return code %d\n", rc)
             logger.error("Failed to connect to MQTT")
 
+    send_push_notification('TESTING 111')
     client = mqtt_client.Client(client_id)
+    send_push_notification('TESTING 1113')
     client.tls_set(ca_certs='./server-ca.crt')
+    send_push_notification('TESTING 1114')
     client.username_pw_set(username, password)
+    send_push_notification('TESTING 1115')
     client.on_connect = on_connect
+    send_push_notification('TESTING 1116')
     client.connect(broker, port)
+    send_push_notification('TESTING 1117')
     return client
 
 

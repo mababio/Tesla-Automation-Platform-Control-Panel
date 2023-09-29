@@ -47,8 +47,9 @@ class Tesla:
             return False
 
     # @retry(logger=logger, delay=10, tries=2, backoff=2)
-    def get_proximity(self):
-        param_prox = self.get_location()
+    def get_proximity(self, param_prox=None):
+        if param_prox is None:
+            param_prox = self.get_location()
         if isinstance(param_prox, dict):
             try:
                 return self.sess.post(self.url_tesla_prox, json=param_prox).json()
@@ -113,7 +114,9 @@ class Tesla:
 
 if __name__ == "__main__":
     obj = Tesla()
-    print(obj.is_near())
+    # 40.669949, -74.096796
+    # print(obj.get_proximity({'lat': '40.669949', 'lon': '-74.096796'}))
+    print(obj.get_proximity())
     # print(self.sess.get(settings['production']['URL']['tesla_info']).json()['vehicle_state']['is_user_present'])
 #  # # print(obj.is_battery_good()) and self.is_parked
 #  # param_prox={'lat':40.669900, 'lon': -74.095629}

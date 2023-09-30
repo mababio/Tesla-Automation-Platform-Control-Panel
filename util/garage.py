@@ -1,3 +1,4 @@
+import time
 from enum import Enum
 import requests
 from config import settings
@@ -7,7 +8,7 @@ import asyncio
 from aiohttp import ClientSession
 import pymyq
 from util.logs import logger
-from util.notification import send_push_notification
+import util.notification as notification
 
 
 class GarageCloseReason(Enum):
@@ -42,35 +43,28 @@ async def get_garage_state() -> None:
 
 def connect_mqtt():
     try:
-        send_push_notification('TESTING 1')
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
                 print("Connected to MQTT Broker!")
-                send_push_notification("Connected to MQTT Broker!")
+                notification.send_push_notification("Connected to MQTT Broker!")
                 logger.info("MQTT Connected")
             else:
                 print("Failed to connect, return code %d\n", rc)
                 logger.error("Failed to connect to MQTT")
-
-        send_push_notification('TESTING 111')
+                notification.send_push_notification("Failed to connect to MQTT")
         client = mqtt_client.Client(client_id)
-        send_push_notification('TESTING 1113')
-        client.tls_set(ca_certs='server-ca.crt')
-        send_push_notification('TESTING 1114')
+        client.tls_set(ca_certs='./server-ca.crt')
         client.username_pw_set(username, password)
-        send_push_notification('TESTING 1115')
         client.on_connect = on_connect
-        send_push_notification('TESTING 1116')
         client.connect(broker, port)
-        send_push_notification('TESTING 1117')
         return client
     except Exception as e:
-        send_push_notification("Getting error connecting to MQTT: {}".format(str(e)))
+        notification.send_push_notification("Getting error connecting to MQTT: {}".format(str(e)))
 
 
 # TODO: May be moving away from myq api soon
 def garage_is_open():
-    send_push_notification('Checking if garage door is open')
+    notification.send_push_notification('Checking if garage door is open')
     garage_state = asyncio.run(get_garage_state())
     return False if garage_state == 'closed' else True
 
@@ -78,24 +72,22 @@ def garage_is_open():
 def request_open():
     if garage_is_open():
         logger.info("Garage is open already! request to open has been ignored")
-        send_push_notification('Garage is open already! request to open has been ignored')
+        notification.send_push_notification('Garage is open already! request to open has been ignored')
         return False
     else:
         logger.info("Opening Garage!")
-        send_push_notification('Opening Garage!')
+        notification.send_push_notification('Opening Garage!')
         client = connect_mqtt()
-        send_push_notification('Opening Garage!!!')
         client.loop_start()
-        send_push_notification('Opening Garage!!!!!!')
+        time.sleep(1)
         # client.publish(topic, "open")
         client.loop_stop()
-        send_push_notification('Opening Garage!!!!!!!!!!')
 
 
 def request_close():
     if not garage_is_open():
         logger.info("Garage is closed already! Request to closed has been ignored")
-        send_push_notification('Garage is closed already! request to closed has been ignored')
+        notification.send_push_notification('Garage is closed already! request to closed has been ignored')
     else:
         logger.info("Closing Garage!")
         client = connect_mqtt()
@@ -105,4 +97,4 @@ def request_close():
 
 
 if __name__ == "__main__":
-    print(garage_is_open())
+    print(request_open())

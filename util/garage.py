@@ -1,6 +1,8 @@
 import time
 from enum import Enum
 import requests
+import sys
+sys.path.append('../')
 from config import settings
 from paho.mqtt import client as mqtt_client
 import random
@@ -53,7 +55,7 @@ def connect_mqtt():
                 logger.error("Failed to connect to MQTT")
                 notification.send_push_notification("Failed to connect to MQTT")
         client = mqtt_client.Client(client_id)
-        client.tls_set(ca_certs='./server-ca.crt')
+        client.tls_set(ca_certs='/app/util/mqtt.crt')
         client.username_pw_set(username, password)
         client.on_connect = on_connect
         client.connect(broker, port)

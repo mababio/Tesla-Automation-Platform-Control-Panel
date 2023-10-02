@@ -11,8 +11,8 @@ steps:
 
   - name: python
     entrypoint: python
-    args: [ "secret_manager.py", download , "util/server-ca.crt", mqtt_ca_crt, $PROJECT_NUMBER ]
-#    args: [ "server-ca.crt", download , $PROJECT_NUMBER ]
+    args: [ "secret_manager.py", download , "util/mqtt.crt", mqtt_ca_crt, $PROJECT_NUMBER ]
+#    args: [ "mqtt.crt", download , $PROJECT_NUMBER ]
     id: MQTT_ca_crt
 
   - name: gcr.io/cloud-builders/docker

@@ -22,7 +22,7 @@ steps:
       - '-t'
       - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
       - '-t'
-      - 'latest'
+      - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:latest'
       - .
       - '-f'
       - Dockerfile

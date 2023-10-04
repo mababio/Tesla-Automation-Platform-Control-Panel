@@ -16,7 +16,7 @@ COPY settings.* ./
 # Option 2: Save settings.toml to GCP Secret Manager. This approach allows for your repo to be clear of sensitive data
 # Review load_settings_toml.py for instruction
 #COPY application_default_credentials.* ./
-#ENV GOOGLE_APPLICATION_CREDENTIALS=application_default_credentials.json
+#ENV GOOGLE_APPLICATION_CREDENTIALS=/app/application_default_credentials.json
 #COPY load_settings_toml.py ./
 #RUN python load_settings_toml.py
 

@@ -7,6 +7,7 @@ from util.logs import logger
 import util.notification as chanify
 from enum import Enum
 from config import settings
+import json
 
 
 class TeslaMode(Enum):
@@ -21,7 +22,7 @@ class Tesla:
     def __init__(self):
         self.gmaps = googlemaps.Client(key=settings['production']['key']['gmaps'])
         self.url_tesla_prox = settings['production']['URL']['tesla_prox']
-        self.url_tesla_location = settings['production']['URL']['tesla_location']
+        self.url_tesla_location_services = settings['production']['URL']['tesla_location_services']
         self.proximity_value = None
         self.db = db_mongo.DBClient()
         self.sess = requests.Session()
@@ -30,7 +31,7 @@ class Tesla:
 
     def is_tesla_moving(self):
         try:
-            return False if self.sess.post(self.url_tesla_location).json()['speed'] is None else True
+            return False if self.sess.post(self.url_tesla_location_services, json={'method': 'get_location'}).json()['speed'] is None else True
         except Exception as e:
             logger.error('is_tesla_moving:::: Issue with tesla location Google function ' + str(e))
             chanify.send_push_notification('is_tesla_moving:::: Issue with tesla location Google function ' + str(e))
@@ -52,7 +53,7 @@ class Tesla:
             param_prox = self.get_location()
         if isinstance(param_prox, dict):
             try:
-                return self.sess.post(self.url_tesla_prox, json=param_prox).json()
+                return self.sess.post(self.url_tesla_prox, json={'method': 'get_proximity'}).json()
             except Exception as e:
                 logger.error('get_proximity: tesla prox function error')
                 raise
@@ -62,10 +63,10 @@ class Tesla:
     @retry(logger=logger.error("GET_LOCATION FAILED: RERUNNING"), delay=10, tries=10, backoff=2)
     def get_location(self):
         try:
-            r_location = self.sess.get(self.url_tesla_location).json()
+            r_location = self.sess.post(self.url_tesla_location_services, json={'method': 'get_location'}).json()
         except Exception as e:
-            logger.error('Connection issue with' + self.url_tesla_location + ":" + str(e))
-            chanify.send_push_notification('Connection issue with' + self.url_tesla_location + ":" + str(e))
+            logger.error('Connection issue with' + self.url_tesla_location_services + ":" + str(e))
+            chanify.send_push_notification('Connection issue with {}'.format(self.url_tesla_location_services + ":" + str(e)))
             raise
 
         if len(r_location) == 0:

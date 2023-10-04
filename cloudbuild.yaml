@@ -30,6 +30,7 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - push
+      - '-a'
       - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
     id: Push
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'

@@ -20,8 +20,7 @@ steps:
       - build
       - '--no-cache'
       - '-t'
-      - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
-      - '-t'
+#      - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
       - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:latest'
       - .
       - '-f'
@@ -30,8 +29,8 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - '-a'
-      - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+#      - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:latest'
     id: Push
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
@@ -43,7 +42,8 @@ steps:
       - '--max-instances=2'
       - '--concurrency=2'
       - '--platform=managed'
-      - '--image=$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+#      - '--image=$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - '--image=$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:latest'
       - >-
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID,$_LABELS
       - '--region=$_DEPLOY_REGION'
@@ -62,7 +62,8 @@ steps:
     id: Security
     entrypoint: gcloud
 images:
-  - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+#  - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+  - '$_GCR_HOSTNAME/$PROJECT_ID/$_REGISTRY_NAME/$_SERVICE_NAME:latest'
 #  - us-central1-docker.pkg.dev /tesla-automation-397321 /test/ mababio
 options:
   substitutionOption: ALLOW_LOOSE

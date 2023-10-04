@@ -2,7 +2,6 @@ import requests
 from retry import retry
 import googlemaps
 import util.db_mongo as db_mongo
-# from  util import db_mongo
 from util.logs import logger
 import util.notification as chanify
 from enum import Enum
@@ -21,7 +20,6 @@ class Tesla:
 
     def __init__(self):
         self.gmaps = googlemaps.Client(key=settings['production']['key']['gmaps'])
-        self.url_tesla_prox = settings['production']['URL']['tesla_prox']
         self.url_tesla_location_services = settings['production']['URL']['tesla_location_services']
         self.proximity_value = None
         self.db = db_mongo.DBClient()
@@ -53,7 +51,7 @@ class Tesla:
             param_prox = self.get_location()
         if isinstance(param_prox, dict):
             try:
-                return self.sess.post(self.url_tesla_prox, json={'method': 'get_proximity'}).json()
+                return self.sess.post(self.url_tesla_location_services, json={'method': 'get_proximity'}).json()
             except Exception as e:
                 logger.error('get_proximity: tesla prox function error')
                 raise
@@ -117,7 +115,7 @@ if __name__ == "__main__":
     obj = Tesla()
     # 40.669949, -74.096796
     # print(obj.get_proximity({'lat': '40.669949', 'lon': '-74.096796'}))
-    print(obj.get_proximity())
+    # print(obj.g)
     # print(self.sess.get(settings['production']['URL']['tesla_info']).json()['vehicle_state']['is_user_present'])
 #  # # print(obj.is_battery_good()) and self.is_parked
 #  # param_prox={'lat':40.669900, 'lon': -74.095629}

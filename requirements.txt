@@ -2,6 +2,12 @@ aiohttp==3.8.5
 dynaconf==3.1.11
 Flask==3.0.0
 Flask_Executor==1.0.0
+google-auth==2.12.0
+google-cloud-logging==3.2.2
+google-cloud-pubsub==2.13.6
+google-cloud-scheduler==2.7.1
+google-cloud-secret-manager==2.12.6
+googleapis-common-protos==1.56.4
 googlemaps==4.6.0
 gunicorn==20.1.0
 paho_mqtt==1.6.1

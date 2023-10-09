@@ -18,10 +18,6 @@ class DBClient:
         self.tesla_gps_save_mongodb_topic = self.publisher.topic_path(settings['production']['pub_sub']
                                                                       ['gps']['project'],
                                                                       settings['production']['pub_sub']['gps']['topic'])
-        self.tesla_validate_and_cleanup_topic = self.publisher.topic_path(settings['production']['pub_sub']
-                                                                          ['validate_cleanup']['project'],
-                                                                          settings['production']['pub_sub']
-                                                                          ['validate_cleanup']['topic'])
         try:
             client = pymongo.MongoClient(settings['production']['database']['mongo']['mongo_client_url']
                                          , username=settings['production']['database']['mongo']['username'],

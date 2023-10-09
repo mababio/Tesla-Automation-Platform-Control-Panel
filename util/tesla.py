@@ -29,10 +29,10 @@ class Tesla:
 
     def is_tesla_moving(self):
         try:
-            return False if self.sess.post(self.url_tesla_location_services, json={'method': 'get_location'}).json()['speed'] is None else True
+            return False if self.sess.get(self.url_tesla_location_services, json={'method': 'get_location'}).json()['speed'] is None else True
         except Exception as e:
-            logger.error('is_tesla_moving:::: Issue with tesla location Google function ' + str(e))
-            chanify.send_push_notification('is_tesla_moving:::: Issue with tesla location Google function ' + str(e))
+            logger.error('is_tesla_moving:::: Issue with tesla location Google function  {}'.format(str(e)))
+            chanify.send_push_notification('is_tesla_moving:::: Issue with tesla location Google function {} '.format(str(e)))
             raise
 
     @retry(logger=logger, delay=15, tries=2, backoff=2)
@@ -51,7 +51,9 @@ class Tesla:
             param_prox = self.get_location()
         if isinstance(param_prox, dict):
             try:
-                return self.sess.post(self.url_tesla_location_services, json={'method': 'get_proximity'}).json()
+                response_obj = self.sess.get(self.url_tesla_location_services, json={'method': 'get_proximity'})
+                response_obj.raise_for_status()
+                return response_obj.json()
             except Exception as e:
                 logger.error('get_proximity: tesla prox function error')
                 raise
@@ -61,9 +63,11 @@ class Tesla:
     @retry(logger=logger.error("GET_LOCATION FAILED: RERUNNING"), delay=10, tries=10, backoff=2)
     def get_location(self):
         try:
-            r_location = self.sess.post(self.url_tesla_location_services, json={'method': 'get_location'}).json()
+            response_obj = self.sess.post(self.url_tesla_location_services, json={'method': 'get_location'})
+            response_obj.raise_for_status()
+            r_location = response_obj.json()
         except Exception as e:
-            logger.error('Connection issue with' + self.url_tesla_location_services + ":" + str(e))
+            logger.error('Connection issue with {} : {}'.format(self.url_tesla_location_services, str(e)))
             chanify.send_push_notification('Connection issue with {}'.format(self.url_tesla_location_services + ":" + str(e)))
             raise
 
@@ -93,11 +97,11 @@ class Tesla:
             raise
         try:
             for i in reverse_geocode_result:
-                if 'Arcuri Court' in i['address_components'][0]['long_name']:
+                if settings['tesla-location-services']['home_street'] in i['address_components'][0]['long_name']:
                     return True
             return False
         except Exception as e:
-            logger.warning("is_on_home_street: output of geocode is not as expected:" + str(e))
+            logger.warning("is_on_home_street: output of geocode is not as expected: {}".format(str(e)))
             raise
 
     def unlock_tesla(self):

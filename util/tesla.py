@@ -29,7 +29,7 @@ class Tesla:
 
     def is_tesla_moving(self):
         try:
-            return False if self.sess.get(self.url_tesla_location_services, json={'method': 'get_location'}).json()['speed'] is None else True
+            return False if self.sess.post(self.url_tesla_location_services, json={'method': 'get_location'}).json()['speed'] is None else True
         except Exception as e:
             logger.error('is_tesla_moving:::: Issue with tesla location Google function  {}'.format(str(e)))
             chanify.send_push_notification('is_tesla_moving:::: Issue with tesla location Google function {} '.format(str(e)))
@@ -107,8 +107,12 @@ class Tesla:
     def unlock_tesla(self):
         if not self.is_tesla_moving():
             try:
-                self.sess.post(settings['production']['URL']['tesla_control'], json={"command": "UNLOCK_CAR"})
-                chanify.send_push_notification("Tesla Unlocked")
+                resposne_obj = self.sess.post(settings['production']['URL']['tesla_control'], json={"command": "UNLOCK_CAR"})
+                if resposne_obj.status_code == 200:
+                    chanify.send_push_notification("TESLA UNLOCK:::: Tesla request to unlock was sent")
+                else:
+                    chanify.send_push_notification('TESLA UNLOCK:::: RAN into HTTP issue')
+                return resposne_obj.json()
             except Exception as e:
                 logger.error("unlock_tesla::::: Issue with http request to :::: " +
                              settings['production']['URL']['tesla_control'] + str(e))

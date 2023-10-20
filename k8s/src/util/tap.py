@@ -1,39 +1,38 @@
 import time
 import requests
 import sys
+from config import settings
 sys.path.append('../')
 import tesla, garage, notification, gcp_scheduler
 from logs import logger
 import utils
-import os
 
 
 class TAP:
 
     def __init__(self):
-
-        self.garage_open_limit = int(os.environ.get("GARAGE_OPEN_LIMIT"))
-        self.confirmation_limit = int(os.environ.get("CONFIRMATION_LIMIT"))
-        self.TESLA_DATA_SERVICES_BASE_URL = os.environ.get("TESLA_DATA_SERVICES_URL")
+        self.tesla_data_services_url = "tesla_data_services:8000"
         self.garage_still_open = None
         self.still_on_home_street = None
+        self.garage_open_limit = settings['production']['garage_open_limit']
+        self.confirmation_limit = settings['production']['confirmation_limit']
         self.tesla_obj = tesla.Tesla()
         self.safety = True
         self.sess = requests.Session()
         adapter = requests.adapters.HTTPAdapter(max_retries=20)
         self.sess.mount('https://', adapter)
-        self.TESLA_DATA_SERVICES_URL = f"{self.TESLA_DATA_SERVICES_BASE_URL}/api/car"
+        self.url_tesla_data_services = settings['production']['URL']['tesla_data_services'] + '/api/car'
 
     def confirmation_before_armed(self):
         while garage.garage_is_open() and not self.garage_open_limit == 0:
-            notification.send_push_notification(f'Garage is open for {str(self.garage_open_limit)} '
-                                                f'seconds remaining to confirm closure')
+            notification.send_push_notification('Garage is open for {} seconds remaining to confirm closure'
+                                                .format(str(self.garage_open_limit)))
             time.sleep(5)
             self.garage_open_limit -= 5
         else:
             while self.tesla_obj.is_on_home_street() and not self.confirmation_limit == 0:
-                notification.send_push_notification(f'Waiting {str(self.confirmation_limit)} seconds for conditions '
-                                                    f'to be met for trigger')
+                notification.send_push_notification('Waiting {} seconds for conditions to be met for trigger'
+                                                    .format(str(self.confirmation_limit)))
                 time.sleep(5)
                 self.confirmation_limit -= 5
             else:
@@ -45,11 +44,12 @@ class TAP:
     def trigger_tesla_home_automation(self):
         # self.db.publish_open_garage()
         garage.request_open()
-        self.sess.put(f'{self.TESLA_DATA_SERVICES_URL}/update/door_opened/{garage.GarageOpenReason.DRIVE_HOME}')
+        self.sess.put('{}{}{}'.format(self.url_tesla_data_services, '/update/door_opened/',
+                                      garage.GarageOpenReason.DRIVE_HOME))
         # set_door_open_status(garage.GarageOpenReason.DRIVE_HOME)
         notification.send_push_notification('Garage door opening!')
         logger.info('trigger_tesla_home_automation::::: Garage door was triggered to open')
-        job = gcp_scheduler.pause_job(gcp_scheduler.Schedule_Jobs.TESLA_LONG_TERM)
+        job = gcp_scheduler.pause_job(gcp_scheduler.schedule_Jobs.TESLA_LONG_TERM)
         if job:
             notification.send_push_notification('job has been disabled!')
         else:
@@ -86,7 +86,6 @@ class TAP:
                     break
                 else:
                     gcp_scheduler.schedule_proximity_job(25)
-                    break
                     break
             else:
                 self.safety = False  # To prevent the while from accidentally running again

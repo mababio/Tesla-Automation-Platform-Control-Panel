@@ -1,16 +1,18 @@
-import time
 from enum import Enum
-import requests
 import sys
-sys.path.append('../')
+
 from config import settings
+import notification
+from logs import logger
+
+sys.path.append('../')
+# from config import settings
 from paho.mqtt import client as mqtt_client
 import random
-import asyncio
 from aiohttp import ClientSession
 import pymyq
-from util.logs import logger
-import util.notification as notification
+# from utils.logs import logger
+# import utils.notification as notification
 
 
 class GarageCloseReason(Enum):
@@ -35,12 +37,15 @@ password = settings['mqtt']['password']
 
 
 async def get_garage_state() -> None:
-    """Create the aiohttp session and run."""
-    async with ClientSession() as websession:
-        myq = await pymyq.login(settings['garage']['username'], settings['garage']['password'], websession)
-
-        devices = myq.covers
-        return devices['CG085035767B'].state
+    try:
+        """Create the aiohttp session and run."""
+        async with ClientSession() as websession:
+            myq = await pymyq.login(settings['garage']['username'], settings['garage']['password'], websession)
+            devices = myq.covers
+            return devices['CG085035767B'].state
+    except Exception as e:
+        notification.send_push_notification('Error with garage my API, but going to proceed')
+        return None
 
 
 def connect_mqtt():
@@ -55,7 +60,7 @@ def connect_mqtt():
                 logger.error("Failed to connect to MQTT")
                 notification.send_push_notification("Failed to connect to MQTT")
         client = mqtt_client.Client(client_id)
-        client.tls_set(ca_certs='/app/util/mqtt.crt')
+        client.tls_set(ca_certs='/app/mqtt.crt')
         client.username_pw_set(username, password)
         client.on_connect = on_connect
         client.connect(broker, port)
@@ -67,8 +72,12 @@ def connect_mqtt():
 # TODO: May be moving away from myq api soon
 def garage_is_open():
     notification.send_push_notification('Checking if garage door is open')
-    garage_state = asyncio.run(get_garage_state())
-    return False if garage_state == 'closed' else True
+    return False
+    # TODO: Issue with pymq https://github.com/arraylabs/pymyq/issues/187
+    # TODO: Appears the issue is fixed, but now getting 429 error. too many requests
+    # Below lines commented out until issue is resolved
+    # garage_state = asyncio.run(get_garage_state())
+    # return False if garage_state == 'closed' else True
 
 
 def request_open():
@@ -79,11 +88,12 @@ def request_open():
     else:
         logger.info("Opening Garage!")
         notification.send_push_notification('Opening Garage!')
-        client = connect_mqtt()
-        client.loop_start()
-        time.sleep(1)
-        # client.publish(topic, "open")
-        client.loop_stop()
+        # TODO:  Once I get this app into kube, than I will find a good mqtt and uncommet lines below
+        # client = connect_mqtt()
+        # client.loop_start()
+        # time.sleep(1)
+        # # client.publish(topic, "open")
+        # client.loop_stop()
 
 
 def request_close():
@@ -92,11 +102,13 @@ def request_close():
         notification.send_push_notification('Garage is closed already! request to closed has been ignored')
     else:
         logger.info("Closing Garage!")
-        client = connect_mqtt()
-        client.loop_start()
-        # client.publish(topic, "closed")
-        client.loop_stop()
+        # TODO:  Once I get this app into kube, than I will find a good mqtt and uncommet lines below
+        # client = connect_mqtt()
+        # client.loop_start()
+        # # client.publish(topic, "closed")
+        # client.loop_stop()
 
 
 if __name__ == "__main__":
-    print(request_open())
+    # print(settings['garage']['username'], settings['garage']['password'])
+    print(garage_is_open())

@@ -3,7 +3,7 @@ import time
 import pymongo
 from datetime import datetime
 from pytz import timezone
-from util import db_mongo, garage
+from gcp.util import db_mongo, garage
 
 obj = db_mongo.DBClient()
 db = obj.get_tesla_database()

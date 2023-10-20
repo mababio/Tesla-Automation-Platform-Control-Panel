@@ -1,11 +1,9 @@
 import time
-import util.db_mongo as db_mongo
-import util.notification as notification
-import util.tesla as tesla
-from util.logs import logger
-from config import settings
-import util.garage as garage
-from util import gcp_scheduler as scheduler
+from gcp import util as db_mongo, util as notification, util as garage
+import gcp.util.tesla as tesla
+from gcp.util.logs import logger
+from gcp.config import settings
+from gcp.util import gcp_scheduler as scheduler
 
 
 class TAP:

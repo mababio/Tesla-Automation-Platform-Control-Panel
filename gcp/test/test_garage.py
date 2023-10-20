@@ -1,7 +1,5 @@
-import time
-
-from util import garage
-from util import db_mongo
+from gcp.util import garage
+from gcp.util import db_mongo
 
 
 db_client = db_mongo.DBClient()

@@ -16,7 +16,13 @@ pymongo==4.2.0
 pymyq==3.1.6
 Requests==2.31.0
 retry==0.9.2
+<<<<<<<< HEAD:gcp/requirements.txt
 redis~=5.0.1
 hvac~=1.2.1
 pytz~=2023.3.post1
 asyncio~=3.4.3
+========
+google-cloud-secret-manager
+pymongo[srv]
+redis
+>>>>>>>> 3558127 (restructured for k8s):k8s/src/requirements.txt

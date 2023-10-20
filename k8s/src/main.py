@@ -77,7 +77,7 @@ def kick_off_job_long_term_bg():
         notification.send_push_notification('kick_off_job_long_term_bg::::: Appears car is home and this function '
                                             'should not run... '
                                             ' pausing gcp cloud scheulder')
-        gcp_scheduler.pause_job(gcp_scheduler.Schedule_Jobs.TESLA_LONG_TERM)
+        gcp_scheduler.pause_job(gcp_scheduler.schedule_Jobs.TESLA_LONG_TERM)
 
         return 'kick_off_job_long_term_bg::::: Appears car is home and this function should not run'
 

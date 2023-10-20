@@ -1,12 +1,15 @@
 import os
-from flask import Flask, g
+from flask import Flask
 from flask_executor import Executor
-from util.db_mongo import DBClient
-from util import tap, notification
+import sys
+sys.path.append('/app')
+from util.utils import get_car_document, set_car_document
+from util import notification
+from util import tap
 from util.logs import logger
-import util.garage as garage
-import util.gcp_scheduler as scheduler
-from util.tesla import Tesla
+from util import garage
+from util import gcp_scheduler
+from util import tesla
 
 app = Flask(__name__)
 executor = Executor(app)
@@ -20,17 +23,6 @@ executor = Executor(app)
 # Everytime a request is made, a new db connection is created
 
 
-@app.before_request
-def before_request():
-    """
-    logic ran before every HTTP requests. Logs issues when they occur and pushes notification
-    """
-    try:
-        g.db = DBClient()
-    except Exception as e:
-        notification.send_push_notification('Faced DB connectivity issue' + str(e))
-        logger.error('before_request::::: Faced DB connectivity issue' + str(e))
-        raise
 
 
 @app.route("/opened")
@@ -40,11 +32,11 @@ def kick_off_job_ifttt_open_bg():
     :return: String status of function
     """
     logger.info('kick_off_job_ifttt_open_bg: start of the /open flask route')
-    if g.db.get_ifttt_trigger_lock() != 'False' or g.db.get_door_close_status() == 'DRIVE_AWAY':
-        notification.send_push_notification("Process is already running")
+    if get_car_document()['trigger'] or get_car_document()['garageStatus']['door_closed'] == 'DRIVE_AWAY':
+        notification.send_push_notification(f"Process is already running { get_car_document()['trigger']} and  {get_car_document()['garageStatus']['door_closed']}")
         return 'Process is already running'
     else:
-        g.db.set_ifttt_trigger_lock("True")
+        set_car_document('trigger', True)
         executor.submit(tesla_automation)
         notification.send_push_notification("Scheduled a job")
         return 'Scheduled a job'
@@ -56,13 +48,13 @@ def kick_off_job_ifttt_close_bg():
     Event driven function. Called when garage door is closed. IFTTT will be triggered to call this function
     :return: String status of function
     """
-    if g.db.get_door_open_status() == 'DRIVE_HOME':
+    if get_car_document()['garageStatus']['door_opened'] == 'DRIVE_HOME':
         executor.submit(garage_door_closed)
         notification.send_push_notification('Car has arrive and door was closed')
         return 'Car has arrive and door was closed'
     else:
         notification.send_push_notification('Garage Door closed')
-        g.db.validate_state_then_cleanup(Tesla)
+        set_car_document('validate_state')
         return 'Garage Door closed'
 
 
@@ -75,8 +67,8 @@ def kick_off_job_long_term_bg():
     :return: String function status
     """
     logger.info('kick_off_job_long_term_bg::::: Kicking off :::::')
-    if g.db.get_door_open_status() == 'DRIVE_AWAY' and g.db.get_ifttt_trigger_lock() != "True":
-        g.db.set_ifttt_trigger_lock("True")
+    if get_car_document()['garageStatus']['door_opened'] == 'DRIVE_AWAY' and get_car_document()['trigger'] != "True":
+        set_car_document('trigger', True)
         tesla_tap = tap.TAP()
         executor.submit(tesla_tap.tesla_home_automation_engine)
         return 'Scheduled a job'
@@ -85,7 +77,7 @@ def kick_off_job_long_term_bg():
         notification.send_push_notification('kick_off_job_long_term_bg::::: Appears car is home and this function '
                                             'should not run... '
                                             ' pausing gcp cloud scheulder')
-        scheduler.pause_job(scheduler.schedule_Jobs.TESLA_LONG_TERM)
+        gcp_scheduler.pause_job(gcp_scheduler.schedule_Jobs.TESLA_LONG_TERM)
 
         return 'kick_off_job_long_term_bg::::: Appears car is home and this function should not run'
 
@@ -94,18 +86,19 @@ def garage_door_closed():
     """
     Clean up function. Function that runs when car returns home and garage door closes
     """
-    g.db.reset_all_flags_tap_is_complete()
+    set_car_document('reset_home')
 
 
+@app.route('/')
 # TODO: update push notification where Arcui is mentioned. parametize on that
 def tesla_automation():
     """
     Main Entry way into tesla home automation engine.
     """
     tesla_tap = tap.TAP()
-    professor = Tesla()
+    professor = tesla.Tesla()
     if tesla_tap.confirmation_before_armed():
-        g.db.tap_set_flags_on()
+        set_car_document('set_flags_on')
         notification.send_push_notification('Trigger Tesla home automation!')
         logger.info('Trigger Tesla home automation!')
         tesla_tap.tesla_home_automation_engine()
@@ -113,10 +106,10 @@ def tesla_automation():
         notification.send_push_notification(' Garage door has been open for a long time. Would your like to close, '
                                             'leave open or are you'
                                             ' loading bikes??')
-        g.db.reset_all_flags_tap_is_complete()
+        set_car_document('reset_home')
     elif professor.is_on_home_street():
         notification.send_push_notification('Still on Arcui ct')
-        g.db.reset_all_flags_tap_is_complete()
+        set_car_document('reset_home')
     else:
         notification.send_push_notification("TAP should of been set!")
         logger.error("tesla_automation::::: TAP should of been set!")
@@ -124,4 +117,4 @@ def tesla_automation():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8083)))

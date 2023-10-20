@@ -1,6 +1,6 @@
 .idea/
-test/test.py
-test/hold.py
+gcp/test/test.py
+gcp/test/hold.py
 TAP.iml
 application_default_credentials.json
 settings.toml

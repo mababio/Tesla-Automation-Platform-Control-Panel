@@ -1,7 +1,7 @@
 from retry import retry
-from util.logs import logger
+from gcp.util.logs import logger
 from google.cloud import pubsub_v1
-from config import settings
+from gcp.config import settings
 
 
 @retry(logger=logger, delay=2, tries=2)

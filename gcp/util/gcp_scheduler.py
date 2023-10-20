@@ -1,11 +1,18 @@
 from enum import Enum
+
+import requests
 from google.cloud import scheduler_v1
 from google.protobuf import field_mask_pb2
-from config import settings
-from util.logs import logger
-import util.notification as notification
+from gcp.config import settings
+from gcp.util.logs import logger
+from gcp import util as notification
 
 client = scheduler_v1.CloudSchedulerClient()
+
+sess = requests.Session()
+adapter = requests.adapters.HTTPAdapter(max_retries=20)
+sess.mount('https://', adapter)
+url_tesla_data_services = settings['production']['URL']['tesla_data_services'] + '/api/car'
 
 
 class schedule_Jobs(Enum):
@@ -16,10 +23,10 @@ def get_cron_format(mins):
     return '*/{mins} * * * *'.format(mins=mins)
 
 
-# TODO: the second param could be rmeoved. the second param is the db util class. it's needed to set trigger to False.
+# TODO: the second param could be rmeoved. the second param is the db src class. it's needed to set trigger to False.
 #  This signifies that the system is free to take on other requests. But this could be done more elegatly.
 # TODO: Find a more open source approach to GCP scheduler
-def schedule_proximity_job(delay_minutes, db):
+def schedule_proximity_job(delay_minutes):
     """
     Function that schedules a HTTP request for car proximity
     :param delay_minutes: how far into the future do you want to run a proximity checker on the car
@@ -35,7 +42,8 @@ def schedule_proximity_job(delay_minutes, db):
     job = client.update_job(request=request)
     if job.state is not job.State.ENABLED:
         enable_job(schedule_Jobs.TESLA_LONG_TERM)
-    db.set_ifttt_trigger_lock("False")
+    request.post("{}{}{}".format(url_tesla_data_services,"/update/trigger/", True))
+    # db.set_ifttt_trigger_lock("False")
     return job
 
 

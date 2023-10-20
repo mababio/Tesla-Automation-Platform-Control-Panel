@@ -1,10 +1,10 @@
 import json
 import pymongo
 from pymongo.server_api import ServerApi
-from util import notification, garage, tesla
-from util.logs import logger
+from gcp.util import notification, garage
+from gcp.util.logs import logger
 from google.cloud import pubsub_v1
-from config import settings
+from gcp.config import settings
 
 
 # TODO: I don't think this db client object is centralized. check and if not make it centralized

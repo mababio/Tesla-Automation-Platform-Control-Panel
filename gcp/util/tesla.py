@@ -1,12 +1,10 @@
 import requests
 from retry import retry
 import googlemaps
-import util.db_mongo as db_mongo
-from util.logs import logger
-import util.notification as chanify
+from gcp import util as db_mongo, util as chanify
+from gcp.util.logs import logger
 from enum import Enum
-from config import settings
-import json
+from gcp.config import settings
 
 
 class TeslaMode(Enum):
@@ -121,6 +119,7 @@ class Tesla:
 
 if __name__ == "__main__":
     obj = Tesla()
+    print(obj.get_proximity())
     # 40.669949, -74.096796
     # print(obj.get_proximity({'lat': '40.669949', 'lon': '-74.096796'}))
     # print(obj.g)

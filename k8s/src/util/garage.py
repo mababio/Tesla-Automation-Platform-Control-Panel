@@ -1,18 +1,26 @@
+import os
 from enum import Enum
 import sys
-
-from config import settings
 import notification
 from logs import logger
 
 sys.path.append('../')
-# from config import settings
 from paho.mqtt import client as mqtt_client
 import random
 from aiohttp import ClientSession
 import pymyq
+
 # from utils.logs import logger
 # import utils.notification as notification
+
+
+MQTT_BROKER = os.environ.get("MQTT_BROKER")
+MQTT_USER = os.environ.get("MQTT_USER")
+MQTT_PASSWORD =os.environ.get("MQTT_PASSWORD")
+TESLA_USERNAME = os.environ.get("TESLA_USERNAME")
+MQ_USER = os.environ.get("MQ_USER")
+MQ_PASSWORD = os.environ.get('MQ_PASSWORD')
+GMAPS_KEY = os.environ.get("GMAPS_KEY")
 
 
 class GarageCloseReason(Enum):
@@ -27,20 +35,20 @@ class GarageOpenReason(Enum):
     NOT_SURE = 'NOT_SURE'
 
 
-broker = settings['mqtt']['broker']
+broker = MQTT_BROKER
 port = 8883
 topic = "garage/command"
 # generate client ID with pub prefix randomly
 client_id = f'garage-Tesla-Automation-Platform-{random.randint(0, 100)}'
-username = settings['mqtt']['username']
-password = settings['mqtt']['password']
+username = MQTT_USER
+password = MQTT_PASSWORD
 
 
 async def get_garage_state() -> None:
     try:
         """Create the aiohttp session and run."""
         async with ClientSession() as websession:
-            myq = await pymyq.login(settings['garage']['username'], settings['garage']['password'], websession)
+            myq = await pymyq.login(MQ_USER, MQ_PASSWORD, websession)
             devices = myq.covers
             return devices['CG085035767B'].state
     except Exception as e:
@@ -59,8 +67,9 @@ def connect_mqtt():
                 print("Failed to connect, return code %d\n", rc)
                 logger.error("Failed to connect to MQTT")
                 notification.send_push_notification("Failed to connect to MQTT")
+
         client = mqtt_client.Client(client_id)
-        client.tls_set(ca_certs='/app/mqtt.crt')
+        client.tls_set(ca_certs='/app/mqtt_crt/mqtt.crt')
         client.username_pw_set(username, password)
         client.on_connect = on_connect
         client.connect(broker, port)
@@ -110,5 +119,4 @@ def request_close():
 
 
 if __name__ == "__main__":
-    # print(settings['garage']['username'], settings['garage']['password'])
     print(garage_is_open())

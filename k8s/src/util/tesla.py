@@ -4,8 +4,8 @@ import googlemaps
 from logs import logger
 import notification as chanify
 from enum import Enum
-from config import settings
 import requests
+import os
 
 
 class TeslaMode(Enum):
@@ -18,13 +18,18 @@ class TeslaMode(Enum):
 class Tesla:
 
     def __init__(self):
-        self.gmaps = googlemaps.Client(key=settings['production']['key']['gmaps'])
-        self.url_tesla_location_services = settings['production']['URL']['tesla_location_services']
+        self.GMAPS_KEY = os.environ.get("GMAPS_KEY")
+        self.TESLA_LOCATION_SERVICES_BASE_URL = os.environ.get("TESLA_LOCATION_SERVICES_BASE_URL")
+        self.TESLA_DATA_SERVICES_BASE_URL = os.environ.get("TESLA_DATA_SERVICES_BASE_URL")
+        self.TESLA_CONTROL_SERVICES_BASE_URL = os.environ.get("TESLA_CONTROL_SERVICES_BASE_URL")
+        self.HOME_STREET = os.environ.get("HOME_STREET")
+        self.gmaps = googlemaps.Client(key=self.GMAPS_KEY)
+        self.url_tesla_location_services = self.TESLA_LOCATION_SERVICES_BASE_URL
         self.proximity_value = None
         self.sess = requests.Session()
         adapter = requests.adapters.HTTPAdapter(max_retries=20)
         self.sess.mount('https://', adapter)
-        self.url_tesla_data_services = settings['production']['URL']['tesla_data_services'] + '/api/car'
+        self.url_tesla_data_services = f'{self.TESLA_DATA_SERVICES_BASE_URL}/api/car'
 
     def is_tesla_moving(self):
         try:
@@ -98,7 +103,7 @@ class Tesla:
             raise
         try:
             for i in reverse_geocode_result:
-                if settings['tesla-location-services']['home_street'] in i['address_components'][0]['long_name']:
+                if self.HOME_STREET in i['address_components'][0]['long_name']:
                     return True
             return False
         except Exception as e:
@@ -108,16 +113,16 @@ class Tesla:
     def unlock_tesla(self):
         if not self.is_tesla_moving():
             try:
-                resposne_obj = self.sess.post(settings['production']['URL']['tesla_control'],
+                response_obj = self.sess.post(self.TESLA_CONTROL_SERVICES_BASE_URL,
                                               json={"command": "UNLOCK_CAR"})
-                if resposne_obj.status_code == 200:
+                if response_obj.status_code == 200:
                     chanify.send_push_notification("TESLA UNLOCK:::: Tesla request to unlock was sent")
                 else:
                     chanify.send_push_notification('TESLA UNLOCK:::: RAN into HTTP issue')
-                return resposne_obj.json()
+                return response_obj.json()
             except Exception as e:
-                logger.error("unlock_tesla::::: Issue with http request to :::: " +
-                             settings['production']['URL']['tesla_control'] + str(e))
+                logger.error(f"unlock_tesla::::: Issue with http request to :::: {self.TESLA_CONTROL_SERVICES_BASE_URL}"
+                             f" str(e)")
                 raise
 
 

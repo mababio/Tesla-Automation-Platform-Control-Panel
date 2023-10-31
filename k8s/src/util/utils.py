@@ -1,6 +1,7 @@
 import requests
+import os
 
-from config import settings
+TESLA_DATA_SERVICES_BASE_URL = os.environ.get("TESLA_DATA_SERVICES_BASE_URL")
 
 
 def get_car_document():
@@ -11,18 +12,14 @@ def get_car_document():
     sess = requests.Session()
     adapter = requests.adapters.HTTPAdapter(max_retries=20)
     sess.mount('https://', adapter)
-    # url_tesla_data_services = f"{settings['production']['URL']['tesla_data_services']}/api/car"
-    url_tesla_data_services = "http://tesla-data-services:8085/api/car"
-    return requests.get(f"{url_tesla_data_services}/get/car").json()
-
+    return requests.get(f"{TESLA_DATA_SERVICES_BASE_URL}/api/car/get/car").json()
 
 
 def set_car_document(param, value=None):
     sess = requests.Session()
     adapter = requests.adapters.HTTPAdapter(max_retries=20)
     sess.mount('https://', adapter)
-    url_tesla_data_services = settings['production']['URL']['tesla_data_services'] + '/api/car'
     if value is not None:
-        return requests.put(f"{url_tesla_data_services}/update/{param}/{value}")
+        return requests.put(f"{TESLA_DATA_SERVICES_BASE_URL}/api/car/update/{param}/{value}")
     else:
-        return requests.put(f"{url_tesla_data_services}/update/{param}")
+        return requests.put(f"{TESLA_DATA_SERVICES_BASE_URL}/api/car/update/{param}")

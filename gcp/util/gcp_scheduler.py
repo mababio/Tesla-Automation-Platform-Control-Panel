@@ -54,7 +54,7 @@ def pause_job(job):
         return True if job.state is job.State.PAUSED else False
     else:
         logger.error('disable_job::::: Issue with input given')
-        raise TypeError('disable_job::::: schedule_Jobs Enum type was not provided')
+        raise TypeError('disable_job::::: Schedule_Jobs Enum type was not provided')
 
 
 def enable_job(job):
@@ -63,7 +63,7 @@ def enable_job(job):
         return client.resume_job(request=request)
     else:
         logger.error('disable_job::::: Issue with input given')
-        raise TypeError('disable_job::::: schedule_Jobs Enum type was not provided')
+        raise TypeError('disable_job::::: Schedule_Jobs Enum type was not provided')
 
 
 if __name__ == "__main__":

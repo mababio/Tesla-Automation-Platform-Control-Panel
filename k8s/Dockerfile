@@ -1,7 +1,32 @@
 FROM python:3.10-slim
-ENV APP_HOME /app
-ENV PORT 8083
 
+######create appuser and directory for app#########
+RUN groupadd -g 999 appuser && \
+    useradd -m -r -u 999 -g appuser appuser
+USER appuser
+ENV APP_HOME  /home/appuser/app
+RUN mkdir /home/appuser/app
+RUN chown appuser:appuser /home/appuser/app
+###### Create appuser and directory for application#########
+
+
+WORKDIR $APP_HOME
+COPY src/ .
+COPY application_default_credentials.json ./
+
+###### Create Python Virutal evironment ###########
+RUN python -m venv $APP_HOME
+RUN . $APP_HOME/bin/activate && pip install -r requirements.txt
+# make sure all messages always reach console
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH "${PYTHONPATH}:$APP_HOME:$APP_HOME/util"
+###### Create Python Virutal evironment ###########
+
+ENV GOOGLE_APPLICATION_CREDENTIALS=$APP_HOME/application_default_credentials.json
+
+####### Application specfic varaibles ##########
+ENV PORT 8083
+#################### For folks who are not creating kubernetes secrets ####################
 #ENV TESLA_LONG_TERM_JOB <VALUE>
 #ENV MQTT_USER <VALUE>
 #ENV MQTT_PASSWORD <VALUE>
@@ -15,14 +40,7 @@ ENV PORT 8083
 #ENV TESLA_LOCATION_SERVICES_BASE_URL <VALUE>
 #ENV TESLA_CONTROL_SERVICES_BASE_URL <VALUE>
 #ENV HOME_STREET <VALUE>
+#################### For folks who are not creating kubernetes secrets ####################
+####### Application specfic varaibles ##########
 
-WORKDIR $APP_HOME
-COPY src/requirements.txt .
-RUN pip install --no-cache-dir -r  requirements.txt
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/application_default_credentials.json
-ENV PYTHONPATH "${PYTHONPATH}:/app:/app/util"
-COPY application_default_credentials.* ./
-COPY src/  .
-RUN apt-get update && apt-get install vim  curl lsof -y
-#CMD echo $CACHE_TESLA_JSON > cache.json; exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
+ENTRYPOINT . $APP_HOME/bin/activate && exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app

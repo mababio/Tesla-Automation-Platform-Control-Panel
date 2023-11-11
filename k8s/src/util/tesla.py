@@ -1,6 +1,5 @@
 import json
 from retry import retry
-import googlemaps
 from logs import logger
 import notification as chanify
 from enum import Enum
@@ -18,12 +17,10 @@ class TeslaMode(Enum):
 class Tesla:
 
     def __init__(self):
-        self.GMAPS_KEY = os.environ.get("GMAPS_KEY")
         self.TESLA_LOCATION_SERVICES_BASE_URL = os.environ.get("TESLA_LOCATION_SERVICES_BASE_URL")
         self.TESLA_DATA_SERVICES_BASE_URL = os.environ.get("TESLA_DATA_SERVICES_BASE_URL")
         self.TESLA_CONTROL_SERVICES_BASE_URL = os.environ.get("TESLA_CONTROL_SERVICES_BASE_URL")
         self.HOME_STREET = os.environ.get("HOME_STREET")
-        self.gmaps = googlemaps.Client(key=self.GMAPS_KEY)
         self.url_tesla_location_services = self.TESLA_LOCATION_SERVICES_BASE_URL
         self.proximity_value = None
         self.sess = requests.Session()
@@ -58,7 +55,7 @@ class Tesla:
             param_prox = self.get_location()
         if isinstance(param_prox, dict):
             try:
-                response_obj = self.sess.gett(self.url_tesla_location_services, json={'method': 'get_proximity'})
+                response_obj = self.sess.get(self.url_tesla_location_services, json={'method': 'get_proximity'})
                 response_obj.raise_for_status()
                 return response_obj.json()
             except Exception as e:
@@ -82,10 +79,10 @@ class Tesla:
         if len(r_location) == 0:
             logger.warning('get_location ::::: Tesla API is not providing Vehicle data right now')
             chanify.send_push_notification('get_location ::::: Tesla API is not providing Vehicle data right now')
-            car_document = self.sess.get('{}{}'.format(self.url_tesla_data_services,'/get/car'))
+            car_document = self.sess.get('{}{}'.format(self.url_tesla_data_services, '/get/car'))
             r_location = car_document['gps']
         try:
-            self.sess.put('{}{}'.format(self.url_tesla_data_services,'/update/gps'), json=json.dumps(r_location))
+            self.sess.put('{}{}'.format(self.url_tesla_data_services, '/update/gps'), json=json.dumps(r_location))
             # self.db.save_location(r_location)
         except Exception as e:
             logger.error("Issue with saving latlon to mongodb:" + str(e))
@@ -95,35 +92,10 @@ class Tesla:
 
     @retry(logger=logger, delay=2, tries=3)
     def is_on_home_street(self):
-        latlon = self.get_location()
         try:
-            reverse_geocode_result = self.gmaps.reverse_geocode((latlon['lat'], latlon['lon']))
+            return requests.get(f'{self.TESLA_LOCATION_SERVICES_BASE_URL}/is_home_street')
         except Exception as e:
-            logger.warning("is_on_home_street: Issue with Gmaps geocode:" + str(e))
-            raise
-        try:
-            for i in reverse_geocode_result:
-                if self.HOME_STREET in i['address_components'][0]['long_name']:
-                    return True
-            return False
-        except Exception as e:
-            logger.warning("is_on_home_street: output of geocode is not as expected: {}".format(str(e)))
-            raise
-
-    def unlock_tesla(self):
-        if not self.is_tesla_moving():
-            try:
-                response_obj = self.sess.post(self.TESLA_CONTROL_SERVICES_BASE_URL,
-                                              json={"command": "UNLOCK_CAR"})
-                if response_obj.status_code == 200:
-                    chanify.send_push_notification("TESLA UNLOCK:::: Tesla request to unlock was sent")
-                else:
-                    chanify.send_push_notification('TESLA UNLOCK:::: RAN into HTTP issue')
-                return response_obj.json()
-            except Exception as e:
-                logger.error(f"unlock_tesla::::: Issue with http request to :::: {self.TESLA_CONTROL_SERVICES_BASE_URL}"
-                             f" str(e)")
-                raise
+            chanify.send_push_notification(f'Issue getting is_home_street value: {e}')
 
 
 if __name__ == "__main__":

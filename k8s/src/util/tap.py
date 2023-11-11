@@ -12,13 +12,11 @@ class TAP:
 
     def __init__(self):
 
-        self.GARAGE_OPEN_LIMIT = os.environ.get("GARAGE_OPEN_LIMIT")
-        self.CONFIRMATION_LIMIT = os.environ.get("CONFIRMATION_LIMIT")
+        self.garage_open_limit = int(os.environ.get("GARAGE_OPEN_LIMIT"))
+        self.confirmation_limit = int(os.environ.get("CONFIRMATION_LIMIT"))
         self.TESLA_DATA_SERVICES_BASE_URL = os.environ.get("TESLA_DATA_SERVICES_URL")
         self.garage_still_open = None
         self.still_on_home_street = None
-        self.garage_open_limit = self.GARAGE_OPEN_LIMIT
-        self.confirmation_limit = self.CONFIRMATION_LIMIT
         self.tesla_obj = tesla.Tesla()
         self.safety = True
         self.sess = requests.Session()

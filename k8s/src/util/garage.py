@@ -17,10 +17,8 @@ import pymyq
 MQTT_BROKER = os.environ.get("MQTT_BROKER")
 MQTT_USER = os.environ.get("MQTT_USER")
 MQTT_PASSWORD =os.environ.get("MQTT_PASSWORD")
-TESLA_USERNAME = os.environ.get("TESLA_USERNAME")
 MQ_USER = os.environ.get("MQ_USER")
 MQ_PASSWORD = os.environ.get('MQ_PASSWORD')
-GMAPS_KEY = os.environ.get("GMAPS_KEY")
 
 
 class GarageCloseReason(Enum):
@@ -79,6 +77,8 @@ def connect_mqtt():
 
 
 # TODO: May be moving away from myq api soon
+# I may want to bake everything into the rasp pi platform. Right now we have the ability to close/open the garage
+#Next would be to check the status of the garage. Currently using the MYQ API that broke
 def garage_is_open():
     notification.send_push_notification('Checking if garage door is open')
     return False

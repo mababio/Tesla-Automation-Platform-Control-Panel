@@ -1,4 +1,6 @@
 import os
+
+import requests
 from flask import Flask, g
 from flask_executor import Executor
 from gcp.util.db_mongo import DBClient
@@ -10,6 +12,8 @@ from gcp.util import Tesla
 
 app = Flask(__name__)
 executor = Executor(app)
+
+TESLA_LOCATION_SERVICES_BASE_URL =  os.environ.get("TESLA_LOCATION_SERVICES_BASE_URL")
 
 
 # TODO: It may be possible to remove IFFTT. Maybe put a listner in the raspi garage setup to always
@@ -114,7 +118,7 @@ def tesla_automation():
                                             'leave open or are you'
                                             ' loading bikes??')
         g.db.reset_all_flags_tap_is_complete()
-    elif professor.is_on_home_street():
+    elif requests.get(f'{TESLA_LOCATION_SERVICES_BASE_URL}/is_home_street'):
         notification.send_push_notification('Still on Arcui ct')
         g.db.reset_all_flags_tap_is_complete()
     else:

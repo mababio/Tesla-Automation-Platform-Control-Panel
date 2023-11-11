@@ -1,5 +1,6 @@
 FROM python:3.10-slim
 
+RUN apt-get update && apt-get install vim curl lsof -y
 ######create appuser and directory for app#########
 RUN groupadd -g 999 appuser && \
     useradd -m -r -u 999 -g appuser appuser
@@ -33,7 +34,6 @@ ENV PORT 8083
 #ENV TESLA_USERNAME <VALUE>
 #ENV MQ_USER <VALUE>
 #ENV MQ_PASSWORD <VALUE>
-#ENV GMAPS_KEY <VALUE>
 #ENV GARAGE_OPEN_LIMIT <VALUE>
 #ENV CONFIRMATION_LIMIT <VALUE>
 #ENV TESLA_DATA_SERVICES_BASE_URL <VALUE>

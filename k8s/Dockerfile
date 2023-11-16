@@ -18,6 +18,7 @@ COPY application_default_credentials.json ./
 ###### Create Python Virutal evironment ###########
 RUN python -m venv $APP_HOME
 RUN . $APP_HOME/bin/activate && pip install -r requirements.txt
+#RUN pip install git+https://github.com/arraylabs/pymyq.git@refs/pull/188/head
 # make sure all messages always reach console
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "${PYTHONPATH}:$APP_HOME:$APP_HOME/util"
@@ -29,16 +30,13 @@ ENV GOOGLE_APPLICATION_CREDENTIALS=$APP_HOME/application_default_credentials.jso
 ENV PORT 8083
 #################### For folks who are not creating kubernetes secrets ####################
 #ENV TESLA_LONG_TERM_JOB <VALUE>
-#ENV MQTT_USER <VALUE>
-#ENV MQTT_PASSWORD <VALUE>
 #ENV TESLA_USERNAME <VALUE>
-#ENV MQ_USER <VALUE>
-#ENV MQ_PASSWORD <VALUE>
 #ENV GARAGE_OPEN_LIMIT <VALUE>
 #ENV CONFIRMATION_LIMIT <VALUE>
 #ENV TESLA_DATA_SERVICES_BASE_URL <VALUE>
 #ENV TESLA_LOCATION_SERVICES_BASE_URL <VALUE>
 #ENV TESLA_CONTROL_SERVICES_BASE_URL <VALUE>
+#ENV GARAGE_SERVICES_BASE_URL <VALUE>
 #ENV HOME_STREET <VALUE>
 #################### For folks who are not creating kubernetes secrets ####################
 ####### Application specfic varaibles ##########

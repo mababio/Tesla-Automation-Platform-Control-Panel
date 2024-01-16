@@ -18,7 +18,6 @@ COPY src/ .
 ###### Create Python Virutal evironment ###########
 RUN python -m venv $APP_HOME
 RUN . $APP_HOME/bin/activate && pip install -r requirements.txt
-#RUN pip install git+https://github.com/arraylabs/pymyq.git@refs/pull/188/head
 # make sure all messages always reach console
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "${PYTHONPATH}:$APP_HOME:$APP_HOME/util"

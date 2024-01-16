@@ -104,4 +104,7 @@ class Tesla:
 if __name__ == "__main__":
     obj = Tesla()
     print(obj.is_near())
+    print(obj.get_location())
+    print(obj.get_proximity())
+    print(obj.is_tesla_moving())
     print('all done')
